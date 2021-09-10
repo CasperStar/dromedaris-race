@@ -12,9 +12,9 @@ logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 
 # Setup Main Class
-class KamelenRace:
+class DromedarisRace:
     def __init__(self) -> None:
-        logging.debug("KamelenRace: Initializing")
+        logging.debug("DromedarisRace: Initializing")
 
         self.I2CBus = smbus.SMBus(1)
         self.EXTENDER_MAPPING = ( MCP23017(self.I2CBus, 0x20, 0xFF, 0xFF), )#MCP23017(self.I2CBus, 0x21, 0xFF, 0xFF) )
@@ -38,10 +38,10 @@ class KamelenRace:
             if (EdgeEventEnum.EDGE_DETECT_RISING == sensor_event.get_edge_event()):
                 track = self.track_container[sensor_event.get_track_id()]
                 track_total_score = track.add_score(1)
-                logging.info("Rising Edge: TRACK ID:%s TotalScore:%s" %(track.get_track_id(), track_total_score))
-                
+                logging.info("DromedarisRace: Rising Edge: TRACK:%s SENSOR:%s TotalScore:%s" %(track.get_track_id(), sensor_event.get_sensor_id(), track_total_score))
+
                 if (track_total_score >= self.MAX_SCORE):
-                    logging.info("KamelenRace: WINNER IS TRACK ID:%s" %(track.get_track_id()))
+                    logging.info("DromedarisRace: WINNER IS TRACK ID:%s" %(track.get_track_id()))
 
                     for track in self.track_container:
                         pass # print all scores
@@ -50,7 +50,7 @@ class KamelenRace:
 
 
     def main(self) -> None:
-        logging.debug("KamelenRace: Running main")
+        logging.debug("DromedarisRace: Running main")
 
         sensor_poller = self.sensor_container.get_sensor_poller()
         sensor_poller.start()
@@ -61,7 +61,7 @@ class KamelenRace:
 
 
 
-# Run Main 
+# Run Main
 if (__name__ == "__main__"):
-    game = KamelenRace()
+    game = DromedarisRace()
     game.main()
