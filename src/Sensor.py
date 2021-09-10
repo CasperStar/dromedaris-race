@@ -42,7 +42,7 @@ class MicroSwitch:
 
     def update(self, updated_value) -> SensorEvent:
         pin_num = self.get_pin_number() % 8
-        updated_bool = bool(updated_value & pin_num)
+        updated_bool = bool(updated_value & (1 << pin_num))
 
         event = EdgeEventEnum.EDGE_DETECT_NONE
         if (updated_bool == True and self.previous_value == False):
