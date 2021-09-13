@@ -3,7 +3,7 @@ import threading, queue
 import time
 import smbus
 
-from ThrowingTrack import ThrowingTrack
+from ThrowingTrack import ThrowingTrack, TrackContainer
 from Sensor import MicroSwitch, SensorContainer, SensorEvent, EdgeEventEnum
 from IOExtender import MCP23017
 
@@ -27,45 +27,54 @@ class DromedarisRace:
         self.I2CBus = smbus.SMBus(1)
         self.EXTENDER_MAPPING = ( MCP23017(self.I2CBus, 0x20, 0xFF, 0xFF), )#MCP23017(self.I2CBus, 0x21, 0xFF, 0xFF) )
         self.SENSOR_MAPPING   = GLOBAL_SENSOR_MAPPING
-        self.NUMBER_OF_TRACKS = 4
-        self.START_SCORE = 0
-        self.MAX_SCORE = 25
+        self.NUMBER_OF_TRACKS = 6
+        self.START_SCORE      = 0
+        self.MAX_SCORE        = 25
 
         self.sensor_event_queue = queue.Queue()
         self.sensor_container = SensorContainer(self.EXTENDER_MAPPING, self.SENSOR_MAPPING, self.sensor_event_queue)
-        self.track_container = list()
-        for i in range(0, self.NUMBER_OF_TRACKS):
-            self.track_container.append(ThrowingTrack(i, self.START_SCORE, self.MAX_SCORE))
+        self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE)
 
-    def __sensor_events_process(self) -> None:
-        while (True):
-            sensor_event = self.sensor_event_queue.get()
+    def __process_sensor_events(self):
+        sensor_event = self.sensor_event_queue.get()
 
-            if (EdgeEventEnum.EDGE_DETECT_RISING == sensor_event.get_edge_event()):
-                track = self.track_container[sensor_event.get_track_id()]
-                track_total_score = track.add_score(1)
-                logging.info("DromedarisRace: Rising Edge: TRACK:%s SENSOR:%s TotalScore:%s" %(track.get_track_id(), sensor_event.get_sensor_id(), track_total_score))
+        if (EdgeEventEnum.EDGE_DETECT_RISING == sensor_event.get_edge_event()):
+            track = self.track_container.get_track(sensor_event.get_track_id())
+            track_total_score = track.add_score(1)
+            logging.info("DromedarisRace: Track ID:%s Sensor:%s TotalScore:%s" %(track.get_track_id(), sensor_event.get_sensor_id(), track_total_score))
+            return track
 
-                if (track_total_score >= self.MAX_SCORE):
-                    logging.info("DromedarisRace: WINNER IS TRACK ID:%s" %(track.get_track_id()))
+        return None
 
-                    for track in self.track_container:
-                        pass # print all scores
+    def __run(self):
+        sensor_poller = self.sensor_container.get_sensor_poller()
+        sensor_poller.start()
 
-                    break
+        track = self.__process_sensor_events()
+        if (track != None): 
+            self.print_score_overview() # Score has changed, so print score overview.
+            if (track.reached_max_score()):
+                logging.info("DromedarisRace: Winner is Track ID:{:02s} Total Score:{:02s}".format(track.get_track_id(), track.get_score()))
+                self.__pause()
+
+    def __pause(self):
+        sensor_poller = self.sensor_container.get_sensor_poller()
+        sensor_poller.stop()
+
+    def __reset(self):
+        self.__pause()
+
+        while not self.sensor_event_queue.empty():
+            self.sensor_event_queue.get()
+
+        self.track_container.reset_scores()
 
 
     def main(self) -> None:
         logging.debug("DromedarisRace: Running main")
 
-        sensor_poller = self.sensor_container.get_sensor_poller()
-        sensor_poller.start()
-        time.sleep(2)
-        #sensor_poller.stop()
-
-        self.__sensor_events_process()
-
-
+        while (True):
+            self.__run()
 
 # Run Main
 if (__name__ == "__main__"):
