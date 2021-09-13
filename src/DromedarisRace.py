@@ -6,6 +6,7 @@ import smbus
 from ThrowingTrack import ThrowingTrack, TrackContainer
 from Sensor import MicroSwitch, SensorContainer, SensorEvent, EdgeEventEnum
 from IOExtender import MCP23017
+from MotorController import MotorController
 
 # Setup Logging Parameters
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -18,6 +19,7 @@ GLOBAL_SENSOR_MAPPING = ( MicroSwitch(1, 1, 0x20,  0), MicroSwitch(1, 2, 0x20,  
                          #MicroSwitch(5, 1, 0x21,  0), MicroSwitch(5, 2, 0x21, 01), MicroSwitch(5, 3, 0x21,  2), # Track 5
                          #MicroSwitch(6, 1, 0x21,  3), MicroSwitch(6, 2, 0x21, 04), MicroSwitch(6, 3, 0x21,  5), # Track 6
 
+#GLOBAL_MOTOR_MAPPING = ( MotorController(1, 18, 100, 19, 20), MotorController(2, 21, 100, 22, 23) )
 
 # Setup Main Class
 class DromedarisRace:
@@ -74,7 +76,9 @@ class DromedarisRace:
         logging.debug("DromedarisRace: Running main")
 
         while (True):
-            self.__run()
+            self.run()
+
+
 
 # Run Main
 if (__name__ == "__main__"):

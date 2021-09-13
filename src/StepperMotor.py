@@ -86,6 +86,12 @@ class StepperMotor:
         self.turn_steps(direction, int(needed_steps))
 
 
+
+
+
+
+
+
 if (__name__ == "__main__"):
     motor = StepperMotor(0.01, 0x00, 0x01, 0x02, 0x03)
     motor.turn_degrees(TurnDirection.ANTI_CLOCKWISE, 360 * 30)
