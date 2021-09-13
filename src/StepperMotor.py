@@ -1,9 +1,9 @@
 import time
 import logging, sys
-#port smbus
-#from IOExtender import MCP23017
+import smbus
+from IOExtender import MCP23017
 
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 REVOLUTION_IN_DEGREES = 360
 NUMBER_OF_HALF_STEPS_PER_REV = 4096
@@ -16,6 +16,12 @@ HALF_STEP_SEQUENCE = ((1,0,0,0),
                       (0,0,0,1),
                       (1,0,0,1))
 
+NUMBER_OF_FULL_STEPS_PER_REV = 2048
+FULL_STEP_SEQUENCE = ((1,0,0,0),
+                      (0,1,0,0),
+                      (0,0,1,0),
+                      (0,0,0,1))
+
 from enum import Enum
 
 class TurnDirection(Enum):
@@ -27,12 +33,13 @@ class StepperMotor:
         logging.debug("StepperMotor: Initializing")
         self.step_delay = delay
         self.current_step = 0
-        self.step_sequence = HALF_STEP_SEQUENCE
+        self.step_sequence = FULL_STEP_SEQUENCE
+        self.NUMBER_OF_STEPS_PER_REV = NUMBER_OF_FULL_STEPS_PER_REV
         self.total_steps = 0
         self.pins = [pin1, pin2, pin3, pin4]
 
-        #self.I2CBus = smbus.SMBus(1)
-        #self.mcp = MCP23017(self.I2CBus, 0x20, 0x00, 0x00)
+        self.I2CBus = smbus.SMBus(1)
+        self.mcp = MCP23017(self.I2CBus, 0x20, 0x00, 0x00)
 
     def set_step_delay(self, delay) -> None:
         self.step_delay = delay
@@ -50,7 +57,7 @@ class StepperMotor:
 
         # Write sequence to IO
         logging.debug("Written Byte: {0:08b}".format(register_byte))
-        #self.mcp.write_register_a(register_byte)
+        self.mcp.write_register_a(register_byte)
 
 
         if (TurnDirection.CLOCKWISE == direction):
@@ -74,11 +81,11 @@ class StepperMotor:
             self.__turn_step(direction)
 
     def turn_degrees(self, direction, degrees) -> None:
-        needed_steps = degrees * (NUMBER_OF_HALF_STEPS_PER_REV / REVOLUTION_IN_DEGREES)
+        needed_steps = degrees * (self.NUMBER_OF_STEPS_PER_REV / REVOLUTION_IN_DEGREES)
         logging.debug("StepperMotor: Turn degrees: {} {} (Steps: {:4.2f})".format(degrees, direction.name, needed_steps))
         self.turn_steps(direction, int(needed_steps))
 
 
 if (__name__ == "__main__"):
-    motor = StepperMotor(2, 0x00, 0x01, 0x02, 0x03)
-    motor.turn_degrees(TurnDirection.CLOCKWISE, 90)
+    motor = StepperMotor(0.01, 0x00, 0x01, 0x02, 0x03)
+    motor.turn_degrees(TurnDirection.ANTI_CLOCKWISE, 360 * 30)

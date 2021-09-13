@@ -10,6 +10,14 @@ from IOExtender import MCP23017
 # Setup Logging Parameters
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
+# MicroSwitch(track_id, sensor_id, device_addr, pin_number)
+GLOBAL_SENSOR_MAPPING = ( MicroSwitch(1, 1, 0x20,  0), MicroSwitch(1, 2, 0x20,  1), MicroSwitch(1, 3, 0x20,  2), # Track 1 
+                          MicroSwitch(2, 1, 0x20,  3), MicroSwitch(2, 2, 0x20,  4), MicroSwitch(2, 3, 0x20,  5)) # Track 2
+                         #MicroSwitch(3, 1, 0x20,  8), MicroSwitch(3, 2, 0x20,  9), MicroSwitch(3, 3, 0x20, 10), # Track 3
+                         #MicroSwitch(4, 1, 0x20, 11), MicroSwitch(4, 2, 0x20, 12), MicroSwitch(4, 3, 0x20, 13), # Track 4
+                         #MicroSwitch(5, 1, 0x21,  0), MicroSwitch(5, 2, 0x21, 01), MicroSwitch(5, 3, 0x21,  2), # Track 5
+                         #MicroSwitch(6, 1, 0x21,  3), MicroSwitch(6, 2, 0x21, 04), MicroSwitch(6, 3, 0x21,  5), # Track 6
+
 
 # Setup Main Class
 class DromedarisRace:
@@ -18,8 +26,8 @@ class DromedarisRace:
 
         self.I2CBus = smbus.SMBus(1)
         self.EXTENDER_MAPPING = ( MCP23017(self.I2CBus, 0x20, 0xFF, 0xFF), )#MCP23017(self.I2CBus, 0x21, 0xFF, 0xFF) )
-        self.SENSOR_MAPPING   = ( MicroSwitch(0x01, 0x01, 0x20, 0x00), MicroSwitch(0x01, 0x02, 0x20, 0x01), MicroSwitch(0x01, 0x03, 0x20, 0x02) )
-        self.NUMBER_OF_TRACKS = 2
+        self.SENSOR_MAPPING   = GLOBAL_SENSOR_MAPPING
+        self.NUMBER_OF_TRACKS = 4
         self.START_SCORE = 0
         self.MAX_SCORE = 25
 
@@ -28,8 +36,6 @@ class DromedarisRace:
         self.track_container = list()
         for i in range(0, self.NUMBER_OF_TRACKS):
             self.track_container.append(ThrowingTrack(i, self.START_SCORE, self.MAX_SCORE))
-
-        time.sleep(2) # TODO: debug time out
 
     def __sensor_events_process(self) -> None:
         while (True):
