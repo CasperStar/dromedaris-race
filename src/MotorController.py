@@ -12,7 +12,7 @@ class TurnDirection(Enum):
     ANTI_CLOCKWISE = 2
 
 class MotorController():
-    def __init__(self, motor_id, pwm_pin, pwm_freq_khz, direction_pin1, direction_pin2) -> None:
+    def __init__(self, motor_id, pi_pwm_pin, pwm_freq_khz, direction_pin1, direction_pin2) -> None:
         logging.debug("MotorController: Initializing {:02}".format(motor_id))
         self.motor_id     = motor_id
         self.pwm_pin      = pwm_pin
@@ -45,6 +45,8 @@ class MotorController():
         GPIO.output(self.direction_pin1, GPIO.LOW)
         GPIO.output(self.direction_pin2, GPIO.LOW)
         self.pwm_output.stop()
+
+
 
 
 if (__name__ == "__main__"):
