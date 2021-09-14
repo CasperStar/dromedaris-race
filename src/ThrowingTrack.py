@@ -1,4 +1,5 @@
 import logging, sys
+from MotorController import MotorController
 
 from Sensor import EdgeEventEnum
 
