@@ -2,33 +2,34 @@ import logging, sys
 import threading, queue
 import time
 import smbus
+import RPi.GPIO as GPIO
 
 from ThrowingTrack import ThrowingTrack, TrackContainer
 from Sensor import MicroSwitch, SensorContainer, SensorEvent, EdgeEventEnum
-from IOExtender import MCP23017, ExtenderPin
+from IOExtender import MCP23017, ExtenderPin, RaspberryPinPWM, IODirection
 from MotorController import MotorController
 
 # Setup Logging Parameters
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 GLOBAL_I2C_BUS = smbus.SMBus(1)
-GLOBAL_EXTENDER_MAPPING = ( MCP23017(GLOBAL_I2C_BUS, 0x20, 0b00111111, 0b00111111), # Track 1 - Track 4 
-                            MCP23017(GLOBAL_I2C_BUS, 0x21, 0b00111111, 0b00000111), # Track 5 - Track 6
-                            MCP23017(GLOBAL_I2C_BUS, 0x22, 0b00000000, 0b00000000)) # Motor 1 - Motor 6
+GLOBAL_EXTENDER_MAPPING = ( MCP23017(GLOBAL_I2C_BUS, 0x20, 0b00111111, 0b11111111, 0b00111111, 0b11111111), # Track 1 - Track 4
+                            MCP23017(GLOBAL_I2C_BUS, 0x21, 0b00111111, 0b11111111, 0b00000111, 0b11111111), # Track 5 - Track 6
+                            MCP23017(GLOBAL_I2C_BUS, 0x22, 0b00000000, 0b11111111, 0b00000000, 0b11111111)) # Motor 1 - Motor 6
 
-GLOBAL_SENSOR_MAPPING = ( MicroSwitch(1, 1, 0x20,  0), MicroSwitch(1, 2, 0x20,  1), MicroSwitch(1, 3, 0x20,  2), # Track 1 
+GLOBAL_SENSOR_MAPPING = ( MicroSwitch(1, 1, 0x20,  0), MicroSwitch(1, 2, 0x20,  1), MicroSwitch(1, 3, 0x20,  2), # Track 1
                           MicroSwitch(2, 1, 0x20,  3), MicroSwitch(2, 2, 0x20,  4), MicroSwitch(2, 3, 0x20,  5)) # Track 2
                          #MicroSwitch(3, 1, 0x20,  8), MicroSwitch(3, 2, 0x20,  9), MicroSwitch(3, 3, 0x20, 10), # Track 3
                          #MicroSwitch(4, 1, 0x20, 11), MicroSwitch(4, 2, 0x20, 12), MicroSwitch(4, 3, 0x20, 13), # Track 4
                          #MicroSwitch(5, 1, 0x21,  0), MicroSwitch(5, 2, 0x21, 01), MicroSwitch(5, 3, 0x21,  2), # Track 5
                          #MicroSwitch(6, 1, 0x21,  3), MicroSwitch(6, 2, 0x21, 04), MicroSwitch(6, 3, 0x21,  5), # Track 6
 
-GLOBAL_MOTOR_MAPPING = ( MotorController(1, 18, 100, ExtenderPin(0x22,  0), ExtenderPin(0x22,  1)), # Track 1 
-                         MotorController(2, 18, 100, ExtenderPin(0x22,  2), ExtenderPin(0x22,  3)), # Track 2
-                         MotorController(3, 18, 100, ExtenderPin(0x22,  4), ExtenderPin(0x22,  5)), # Track 3
-                         MotorController(4, 18, 100, ExtenderPin(0x22,  6), ExtenderPin(0x22,  7)), # Track 4
-                         MotorController(5, 18, 100, ExtenderPin(0x22,  8), ExtenderPin(0x22,  9)), # Track 5
-                         MotorController(6, 18, 100, ExtenderPin(0x22, 10), ExtenderPin(0x22, 11))) # Track 6
+GLOBAL_MOTOR_MAPPING = ( MotorController(1, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  0, IODirection.OUTPUT), ExtenderPin(0x22,  1, IODirection.OUTPUT)), # Track 1
+                         MotorController(2, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  2, IODirection.OUTPUT), ExtenderPin(0x22,  3, IODirection.OUTPUT)), # Track 2
+                         MotorController(3, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  4, IODirection.OUTPUT), ExtenderPin(0x22,  5, IODirection.OUTPUT)), # Track 3
+                         MotorController(4, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  6, IODirection.OUTPUT), ExtenderPin(0x22,  7, IODirection.OUTPUT)), # Track 4
+                         MotorController(5, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  8, IODirection.OUTPUT), ExtenderPin(0x22,  9, IODirection.OUTPUT)), # Track 5
+                         MotorController(6, RaspberryPinPWM(18, 100), ExtenderPin(0x22, 10, IODirection.OUTPUT), ExtenderPin(0x22, 11, IODirection.OUTPUT))) # Track 6
 
 # Setup Main Class
 class DromedarisRace:
@@ -59,7 +60,7 @@ class DromedarisRace:
         sensor_poller.start()
 
         track = self.__process_sensor_events()
-        if (track != None): 
+        if (track != None):
             self.print_score_overview() # Score has changed, so print score overview.
             if (track.reached_max_score()):
                 logging.info("DromedarisRace: Winner is Track ID:{:02s} Total Score:{:02s}".format(track.get_track_id(), track.get_score()))
@@ -85,8 +86,11 @@ class DromedarisRace:
             self.run()
 
 
-
 # Run Main
 if (__name__ == "__main__"):
-    game = DromedarisRace()
-    game.main()
+    try:
+        DromedarisRace().main()
+
+    except KeyboardInterrupt:
+        logging.info("Ctrl + C: Exiting program")
+        GPIO.cleanup()

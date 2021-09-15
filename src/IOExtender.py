@@ -1,10 +1,12 @@
 
 import logging, random
 from DromedarisRace import GLOBAL_I2C_BUS
-from Testing import IODirection
 import smbus
 import abc
 from enum import Enum
+
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
 
 class ExtenderContainer:
     def __init__(self, extender_mapping) -> None:
@@ -33,6 +35,43 @@ class DigitalPin(abc.ABC):
     def get(self):
         pass
 
+class RaspberryPin(DigitalPin):
+    def __init__(self, pin, direction) -> None:
+        logging.debug("RaspberryPin: Initializing {02} {}".format(pin, direction.name))
+        self.pin = pin
+        self.direction = direction
+        if (self.direction == IODirection.INPUT):
+            GPIO.setup(self.pin, GPIO.IN)
+        elif (self.direction == IODirection.OUTPUT):
+            GPIO.setup(self.pin, GPIO.OUT)
+
+    def set(self, value):
+        if (self.direction == IODirection.OUTPUT):
+            GPIO.output(self.pin, value)
+        else:
+            raise Exception("RaspberryPin: Writing PIN:{:02} while it is an input!".format(self.pin))
+
+    def get(self):
+        return GPIO.input(self.pin)
+
+class RaspberryPinPWM():
+    def __init__(self, pin, frequency_hz) -> None:
+        self.pin = pin
+        GPIO.setup(self.pin, GPIO.OUT)
+        self.pwm_pin = GPIO.PWM(self.pin, frequency_hz)
+
+    def start(self, duty_cycle):
+        self.pwm_pin.start(duty_cycle)
+
+    def stop(self):
+        self.pwm_pin.stop()
+
+    def set_frequency(self, frequency_hz):
+        self.pwm_pin.ChangeFrequency(frequency_hz)
+
+    def set_duty_cycle(self, duty_cycle):
+        self.pwm_pin.ChangeDutyCycle(duty_cycle)
+
 class ExtenderPin(DigitalPin):
     def __init__(self, device_addr, pin, direction) -> None:
         self.pin = pin
@@ -44,7 +83,7 @@ class ExtenderPin(DigitalPin):
         if (self.direction == IODirection.OUTPUT):
             self.extender.write_output_pin(self.pin, value)
         else:
-            raise Exception("Writing to a input!")
+            raise Exception("ExtenderPin: Writing DEV:{:02X} PIN:{:02} while it is an input!".format(self.extender.get_device_addr(), self.pin))
 
     def get(self):
         return self.extender.read_output_pin(self.pin)
@@ -72,9 +111,9 @@ class MCP23017:
     def get_device_addr(self):
         return self.device_addr
 
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # [REGISTER GET + SET: INPUT / OUTPUT]
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_output_pin(self, pin):
         if (pin < 7):
@@ -102,9 +141,9 @@ class MCP23017:
     def write_output_register_b(self, byte):
         self.write_regsiter(self.OLATB, byte)
 
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # [REGISTER GET + SET: PULLUP]
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_pullup_pin(self, pin):
         if (pin < 7):
@@ -132,9 +171,9 @@ class MCP23017:
     def write_pullup_register_b(self, byte):
         self.write_regsiter(self.GPPUB, byte)
 
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # [REGISTER GET + SET: DIRECTION]
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_direction_pin(self, pin):
         if (pin < 7):
@@ -162,9 +201,9 @@ class MCP23017:
     def write_direction_register_b(self, byte):
         self.write_regsiter(self.IODIRB, byte)
 
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # [GENERIC REGISTER GET + SET]
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_pin(self, register, pin):
         logging.debug("MCP23017: ID:{} Reading pin {:02} from {:02X}".format(self.device_addr, pin, register))

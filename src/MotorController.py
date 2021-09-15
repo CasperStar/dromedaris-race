@@ -1,73 +1,61 @@
-from enum import Enum
 import logging, sys
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BOARD)
-
-import time
+from enum import Enum
 
 class TurnDirection(Enum):
     CLOCKWISE = 1
     ANTI_CLOCKWISE = 2
 
 class MotorController():
-    def __init__(self, motor_id, pi_pwm_pin, pwm_freq_khz, direction_pin1, direction_pin2) -> None:
+    def __init__(self, motor_id, pwm_pin, dir_pin_1, dir_pin_2) -> None:
         logging.debug("MotorController: Initializing {:02}".format(motor_id))
-        self.motor_id     = motor_id
-        self.pwm_pin      = pwm_pin
-        self.pwm_freq_khz = pwm_freq_khz
-        self.direction_pin1 = direction_pin1
-        self.direction_pin2 = direction_pin2
+        self.motor_id = motor_id
+        self.pwm_pin  = pwm_pin
+        self.direction_pin_1 = dir_pin_1
+        self.direction_pin_2 = dir_pin_2
 
-        GPIO.setup(self.pwm_pin, GPIO.OUT)
-        self.pwm_output = GPIO.PWM(self.pwm_pin, self.pwm_freq_khz)
-
-        GPIO.setup(self.direction_pin1, GPIO.OUT)
-        GPIO.output(self.direction_pin1, GPIO.HIGH)
-
-        GPIO.setup(self.direction_pin2, GPIO.OUT)
-        GPIO.output(self.direction_pin2, GPIO.LOW)
-
-    def run(self, turn_direction, speed):
-        if (TurnDirection.CLOCKWISE == turn_direction):
-            GPIO.output(self.direction_pin1, GPIO.HIGH)
-            GPIO.output(self.direction_pin2, GPIO.LOW)
-        elif (TurnDirection.ANTI_CLOCKWISE == turn_direction):
-            GPIO.output(self.direction_pin1, GPIO.LOW)
-            GPIO.output(self.direction_pin2, GPIO.HIGH)
-
-        logging.debug("MotorController: Motor {:02} running {:02}%".format(self.motor_id, speed))
-        self.pwm_output.start(speed)
+    def start(self, turn_direction, speed):
+        logging.debug("MotorController: Motor {:02} running {} at {:02}%".format(self.motor_id, turn_direction.name, speed))
+        self.set_direction(turn_direction)
+        self.pwm_pin.start(speed)
 
     def stop(self):
         logging.debug("MotorController: Motor {:02} stopping".format(self.motor_id))
-        GPIO.output(self.direction_pin1, GPIO.LOW)
-        GPIO.output(self.direction_pin2, GPIO.LOW)
-        self.pwm_output.stop()
+        self.direction_pin_1.set(False)
+        self.direction_pin_2.set(False)
+        self.pwm_pin.stop()
 
+    def set_speed(self, speed):
+        logging.debug("MotorController: Motor {:02} set speed {:02}%".format(self.motor_id, speed))
+        self.pwm_pin.set_duty_cycle(speed)
 
+    def set_direction(self, turn_direction):
+        logging.debug("MotorController: Motor {:02} set direction {}".format(self.motor_id, turn_direction.name))
+        if (TurnDirection.CLOCKWISE == turn_direction):
+            self.direction_pin_1.set(True)
+            self.direction_pin_2.set(False)
+        elif (TurnDirection.ANTI_CLOCKWISE == turn_direction):
+            self.direction_pin_1.set(False)
+            self.direction_pin_2.set(True)
 
+#TODO: REMOVE DEBUG BELOW
+from IOExtender import RaspberryPin, RaspberryPinPWM, IODirection
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+import time
 
 if (__name__ == "__main__"):
-    motor = MotorController(1, 12, 100, 16, 18)
+    motor = MotorController(1, RaspberryPinPWM(18, 100), RaspberryPin(19,  IODirection.OUTPUT), RaspberryPin(20, IODirection.OUTPUT))
 
     for val in range(10, 100, 10):
-        motor.run(TurnDirection.CLOCKWISE, val)
+        motor.start(TurnDirection.CLOCKWISE, val)
         time.sleep(2)
 
     motor.stop()
 
     for val in range(10, 100, 10):
-        motor.run(TurnDirection.ANTI_CLOCKWISE, val)
+        motor.start(TurnDirection.ANTI_CLOCKWISE, val)
         time.sleep(2)
 
     motor.stop()
 
-    GPIO.cleanup()
-    
 
-
-
-# Moving distance = 400 CM 
-# Max Score = 25 
