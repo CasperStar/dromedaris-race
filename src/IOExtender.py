@@ -1,12 +1,14 @@
 
-import logging, random
-from DromedarisRace import GLOBAL_I2C_BUS
-import smbus
+import logging, random, sys
 import abc
 from enum import Enum
 
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
+
+import smbus
+GLOBAL_I2C_BUS = smbus.SMBus(1)
+
 
 class ExtenderContainer:
     def __init__(self, extender_mapping) -> None:
@@ -37,7 +39,7 @@ class DigitalPin(abc.ABC):
 
 class RaspberryPin(DigitalPin):
     def __init__(self, pin, direction) -> None:
-        logging.debug("RaspberryPin: Initializing {02} {}".format(pin, direction.name))
+        logging.debug("RaspberryPin: Initializing PIN:{:02} DIR:{}".format(pin, direction.name))
         self.pin = pin
         self.direction = direction
         if (self.direction == IODirection.INPUT):
@@ -56,6 +58,7 @@ class RaspberryPin(DigitalPin):
 
 class RaspberryPinPWM():
     def __init__(self, pin, frequency_hz) -> None:
+        logging.debug("RaspberryPinPWM: Initializing PIN:{:02} on {:03}Hz".format(pin, frequency_hz))
         self.pin = pin
         GPIO.setup(self.pin, GPIO.OUT)
         self.pwm_pin = GPIO.PWM(self.pin, frequency_hz)
@@ -74,16 +77,17 @@ class RaspberryPinPWM():
 
 class ExtenderPin(DigitalPin):
     def __init__(self, device_addr, pin, direction) -> None:
+        logging.debug("ExtenderPin: Initializing DEV:0x{:02X} PIN:{:02} DIR:{}".format(device_addr, pin, direction.name))
         self.pin = pin
         self.direction = direction
-        self.extender = MCP23017(GLOBAL_I2C_BUS, device_addr)
-        self.extender.set_pin_direction(pin, direction)
+        self.extender = MCP23017(device_addr)
+        self.extender.write_direction_pin(pin, direction)
 
     def set(self, value):
         if (self.direction == IODirection.OUTPUT):
             self.extender.write_output_pin(self.pin, value)
         else:
-            raise Exception("ExtenderPin: Writing DEV:{:02X} PIN:{:02} while it is an input!".format(self.extender.get_device_addr(), self.pin))
+            raise Exception("ExtenderPin: Writing DEV:0x{:02X} PIN:{:02} while it is an input!".format(self.extender.get_device_addr(), self.pin))
 
     def get(self):
         return self.extender.read_output_pin(self.pin)
@@ -98,15 +102,16 @@ class MCP23017:
     OLATA  = 0x14 # Output Latch Register A
     OLATB  = 0x15 # Output Latch Register B
 
-    def __init__(self, bus, addr, dir_reg_a = None, pullup_reg_a = None, dir_reg_b = None, pullup_reg_b = None) -> None:
-        logging.debug("MCP23017: ID:%s Initializing" %(addr))
-        self.bus = bus
+    def __init__(self, addr, dir_reg_a = None, pullup_reg_a = None, dir_reg_b = None, pullup_reg_b = None) -> None:
+        logging.debug("MCP23017: ID:0x{:02X} Initializing".format(addr))
+        self.bus = GLOBAL_I2C_BUS
         self.device_addr = addr
 
-        self.write_direction_register_a(dir_reg_a)
-        self.write_pullup_register_a(pullup_reg_a)
-        self.write_direction_register_b(dir_reg_b)
-        self.write_pullup_register_b(pullup_reg_b)
+        if (dir_reg_a != None):
+            self.write_direction_register_a(dir_reg_a)
+            self.write_pullup_register_a(pullup_reg_a)
+            self.write_direction_register_b(dir_reg_b)
+            self.write_pullup_register_b(pullup_reg_b)
 
     def get_device_addr(self):
         return self.device_addr
@@ -116,7 +121,7 @@ class MCP23017:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_output_pin(self, pin):
-        if (pin < 7):
+        if (pin < 8):
             return self.read_pin(self.GPIOA)
         else:
             pin = pin % 8
@@ -129,11 +134,11 @@ class MCP23017:
         return self.read_regsiter(self.GPIOB)
 
     def write_output_pin(self, pin, value):
-        if (pin < 7):
-            self.write_pin(self.OLATA, value)
+        if (pin < 8):
+            self.write_pin(self.OLATA, pin, value)
         else:
             pin = pin % 8
-            self.write_pin(self.OLATB, value)
+            self.write_pin(self.OLATB, pin, value)
 
     def write_output_register_a(self, byte):
         self.write_regsiter(self.OLATA, byte)
@@ -146,7 +151,7 @@ class MCP23017:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_pullup_pin(self, pin):
-        if (pin < 7):
+        if (pin < 8):
             return self.read_pin(self.GPPUA)
         else:
             pin = pin % 8
@@ -159,11 +164,11 @@ class MCP23017:
         return self.read_regsiter(self.GPPUB)
 
     def write_pullup_pin(self, pin, value):
-        if (pin < 7):
-            self.write_pin(self.GPPUA, value)
+        if (pin < 8):
+            self.write_pin(self.GPPUA, pin, value)
         else:
             pin = pin % 8
-            self.write_pin(self.GPPUB, value)
+            self.write_pin(self.GPPUB, pin, value)
 
     def write_pullup_register_a(self, byte):
         self.write_regsiter(self.GPPUA, byte)
@@ -176,7 +181,7 @@ class MCP23017:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_direction_pin(self, pin):
-        if (pin < 7):
+        if (pin < 8):
             return self.read_pin(self.IODIRA)
         else:
             pin = pin % 8
@@ -189,11 +194,11 @@ class MCP23017:
         return self.read_regsiter(self.IODIRB)
 
     def write_direction_pin(self, pin, value):
-        if (pin < 7):
-            self.write_pin(self.IODIRA, value)
+        if (pin < 8):
+            self.write_pin(self.IODIRA, pin, value)
         else:
             pin = pin % 8
-            self.write_pin(self.IODIRB, value)
+            self.write_pin(self.IODIRB, pin, value)
 
     def write_direction_register_a(self, byte):
         self.write_regsiter(self.IODIRA, byte)
@@ -206,12 +211,12 @@ class MCP23017:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_pin(self, register, pin):
-        logging.debug("MCP23017: ID:{} Reading pin {:02} from {:02X}".format(self.device_addr, pin, register))
+        logging.debug("MCP23017: ID:0x{:02X} Reading pin {:02} from 0x{:02X}".format(self.device_addr, pin, register))
         current_value = self.read_regsiter(register)
         return current_value & (1 << pin)
 
     def write_pin(self, register, pin, value):
-        logging.debug("MCP23017: ID:{} Setting pin {:02} in {:02} to {}".format(self.device_addr, pin, register, value))
+        logging.debug("MCP23017: ID:0x{:02X} Setting pin {:02} in {:02} to {}".format(self.device_addr, pin, register, value))
         current_value = self.read_regsiter(register)
         if (value == True):
             current_value |= (1 << pin) # Set Pin
@@ -222,9 +227,9 @@ class MCP23017:
 
     def read_regsiter(self, register):
         byte = self.bus.read_byte_data(self.device_addr, register)
-        logging.debug("MCP23017: ID:{} Reading register {:02X} ({:08b})".format(self.device_addr, register, byte))
+        logging.debug("MCP23017: ID:0x{:02X} Reading register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
         return byte
 
     def write_regsiter(self, register, byte):
-        logging.debug("MCP23017: ID:{} Writing register {:02X} ({:08b})".format(self.device_addr, register, byte))
+        logging.debug("MCP23017: ID:0x{:02X} Writing register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
         self.bus.write_byte_data(self.device_addr, register, byte)

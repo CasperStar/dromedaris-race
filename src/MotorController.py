@@ -1,5 +1,9 @@
 import logging, sys
 
+#TODO: REMOVE DEBUG BELOW
+from IOExtender import RaspberryPin, RaspberryPinPWM, IODirection
+import time
+
 from enum import Enum
 
 class TurnDirection(Enum):
@@ -38,10 +42,7 @@ class MotorController():
             self.direction_pin_1.set(False)
             self.direction_pin_2.set(True)
 
-#TODO: REMOVE DEBUG BELOW
-from IOExtender import RaspberryPin, RaspberryPinPWM, IODirection
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-import time
+
 
 if (__name__ == "__main__"):
     motor = MotorController(1, RaspberryPinPWM(18, 100), RaspberryPin(19,  IODirection.OUTPUT), RaspberryPin(20, IODirection.OUTPUT))

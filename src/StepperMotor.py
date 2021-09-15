@@ -3,7 +3,6 @@ import logging, sys
 import smbus
 from IOExtender import MCP23017
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 REVOLUTION_IN_DEGREES = 360
 NUMBER_OF_HALF_STEPS_PER_REV = 4096

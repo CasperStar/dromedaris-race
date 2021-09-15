@@ -1,11 +1,10 @@
 import logging, sys
-from MotorController import MotorController
 
 from Sensor import EdgeEventEnum
 
 class TrackContainer:
     def __init__(self, number_of_tracks, score_start, score_max) -> None:
-        logging.debug("TrackContainer: Initializing {:02s} Tracks".format(number_of_tracks))
+        logging.debug("TrackContainer: Initializing {} Tracks".format(number_of_tracks))
         self.score_start = score_start
         self.score_max = score_max
         self.tracks = list()
@@ -16,7 +15,7 @@ class TrackContainer:
         return self.tracks[index]
 
     def try_get_winner(self):
-        for track in self.track_container:
+        for track in self.tracks:
             if (track >= track. self.score_max):
                 return True, track
         return False
@@ -25,12 +24,12 @@ class TrackContainer:
         logging.info('-' * 20)
         logging.info("{: ^20}".format("SCORE OVERVIEW"))
         logging.info('-' * 20)
-        for track in self.track_container:
-            logging.info("Track ID: {:02} Score: {:02}".format(track.get_score(), track.get_track_id()))
+        for track in self.tracks:
+            logging.info("Track ID: {:02} Score: {:02}".format(track.get_track_id(), track.get_score()))
 
     def reset_scores(self):
         logging.debug("TrackContainer: Reset all scores")
-        for track in self.track_container:
+        for track in self.tracks:
             track.set_score(self.score_start)
 
 

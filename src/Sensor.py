@@ -2,11 +2,9 @@ import threading, queue
 
 import logging, sys
 
-
-import time, random # TODO: REMOVE DEBUG
 from enum import Enum
 
-from IOExtender import ExtenderContainer, MCP23017
+from IOExtender import ExtenderContainer
 
 class EdgeEventEnum(Enum):
     EDGE_DETECT_NONE = 0
@@ -33,12 +31,12 @@ class SensorEvent:
 
 class MicroSwitch:
     def __init__(self, track_id, sensor_id, device_addr, pin_number) -> None:
-        logging.debug("Initializing MicroSwitch Track:%s Sensor:%s (DEV:%s PIN:%s)" %(track_id, sensor_id, device_addr, pin_number))
+        logging.debug("MicroSwitch: Initializing Track:{:02} Sensor:{:02} (DEV:0x{:02X} PIN:{:02})".format(track_id, sensor_id, device_addr, pin_number))
         self.track_id = track_id
         self.sensor_id = sensor_id
         self.device_addr = device_addr
         self.pin_number = pin_number
-        self.previous_value = False
+        self.previous_value = True
 
     def update(self, updated_value) -> SensorEvent:
         pin_num = self.get_pin_number() % 8
@@ -49,8 +47,8 @@ class MicroSwitch:
             event = EdgeEventEnum.EDGE_DETECT_RISING
         elif (updated_bool == False and self.previous_value == True):
             event = EdgeEventEnum.EDGE_DETECT_FALLING
-
-        logging.debug("Polling MicroSwitch ID:%s (%s)" %(self.sensor_id, event.name))
+        
+        #logging.debug("Polling MicroSwitch ID:%s (%s)" %(self.sensor_id, event.name)) # TODO: ENABLE IF NEEDED
         self.previous_value = updated_bool
         return SensorEvent(self.track_id, self.sensor_id, event)
 
