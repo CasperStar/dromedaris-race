@@ -1,12 +1,10 @@
 import threading, queue
 
 import logging, sys
-
-
-import time, random # TODO: REMOVE DEBUG
+import time 
 from enum import Enum
 
-from IOExtender import ExtenderContainer, MCP23017
+from IOControl import ExtenderContainer
 
 class EdgeEventEnum(Enum):
     EDGE_DETECT_NONE = 0
@@ -28,30 +26,36 @@ class SensorEvent:
     def get_edge_event(self) -> int:
         return self.edge_event
 
-    def get_event_info(self) -> str: # TODO: DEBUG remove
-        return ("T:%s S:%s (%s)" %(self.track_id, self.sensor_id, self.edge_event.name))
 
 class MicroSwitch:
-    def __init__(self, track_id, sensor_id, device_addr, pin_number) -> None:
-        logging.debug("Initializing MicroSwitch Track:%s Sensor:%s (DEV:%s PIN:%s)" %(track_id, sensor_id, device_addr, pin_number))
+    def __init__(self, track_id, sensor_id, device_addr, pin_number, debounce_time_ms) -> None:
+        logging.debug("MicroSwitch: Initializing Track:{:02} Sensor:{:02} (DEV:0x{:02X} PIN:{:02})".format(track_id, sensor_id, device_addr, pin_number))
         self.track_id = track_id
         self.sensor_id = sensor_id
         self.device_addr = device_addr
         self.pin_number = pin_number
-        self.previous_value = False
+        self.previous_value = True
+        self.previous_update_time_ms = 0
+        self.debounce_time_out_ms = debounce_time_ms
 
     def update(self, updated_value) -> SensorEvent:
         pin_num = self.get_pin_number() % 8
         updated_bool = bool(updated_value & (1 << pin_num))
 
-        event = EdgeEventEnum.EDGE_DETECT_NONE
-        if (updated_bool == True and self.previous_value == False):
-            event = EdgeEventEnum.EDGE_DETECT_RISING
-        elif (updated_bool == False and self.previous_value == True):
-            event = EdgeEventEnum.EDGE_DETECT_FALLING
+        current_time_ms = time.time() * 1000
+        delta_time_ms = current_time_ms - self.previous_update_time_ms 
 
-        logging.debug("Polling MicroSwitch ID:%s (%s)" %(self.sensor_id, event.name))
-        self.previous_value = updated_bool
+        event = EdgeEventEnum.EDGE_DETECT_NONE
+        if ((updated_bool == True and self.previous_value == False) and delta_time_ms > self.debounce_time_out_ms):
+            event = EdgeEventEnum.EDGE_DETECT_RISING
+            self.previous_update_time_ms = current_time_ms
+            self.previous_value = updated_bool
+        elif ((updated_bool == False and self.previous_value == True) and delta_time_ms > self.debounce_time_out_ms):
+            event = EdgeEventEnum.EDGE_DETECT_FALLING
+            self.previous_update_time_ms = current_time_ms
+            self.previous_value = updated_bool
+
+        #logging.debug("Polling MicroSwitch ID:%s (%s)" %(self.sensor_id, event.name)) # DEBUG: ENABLE IF NEEDED
         return SensorEvent(self.track_id, self.sensor_id, event)
 
     def get_track_id(self) -> int:
@@ -91,9 +95,9 @@ class SensorContainer:
                     self.__update_event_queue(sensor.update(reg_b))
 
     def __update_event_queue(self, sensor_event):
-        if (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_RISING):
+        if (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_FALLING):
             self.sensor_event_queue.put(sensor_event)
-        #elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_FALLING):
+        #elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_RISING):
         #    self.sensor_event_queue.put(sensor_event)
         # elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_NONE):
         #     self.sensor_event_queue.put(sensor_event)
@@ -121,6 +125,6 @@ class SensorPoller:
         self.polling_thread.start()
 
     def stop(self) -> None:
-        logging.debug("SensorPoller: Stopping polling thread")
+        logging.info("SensorPoller: Stopping polling thread")
         self.polling_thread_running.clear()
         self.polling_thread.join()
