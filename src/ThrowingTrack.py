@@ -1,15 +1,16 @@
 import logging, sys
 
 from Sensor import EdgeEventEnum
+from MotorController import MotorController, TurnDirection
 
 class TrackContainer:
-    def __init__(self, number_of_tracks, score_start, score_max) -> None:
+    def __init__(self, number_of_tracks, score_start, score_max, motor_mapping) -> None:
         logging.debug("TrackContainer: Initializing {} Tracks".format(number_of_tracks))
         self.score_start = score_start
         self.score_max = score_max
         self.tracks = list()
         for i in range(0, number_of_tracks):
-            self.tracks.append(ThrowingTrack(i, score_start, score_max))
+            self.tracks.append(ThrowingTrack(i, score_start, score_max,  motor_mapping[i]))
 
     def get_track(self, index):
         return self.tracks[index]
@@ -32,20 +33,26 @@ class TrackContainer:
         for track in self.tracks:
             track.set_score(self.score_start)
 
+    def pause_motors(self):
+        for track in self.tracks:
+            track.pause_motor()
+
 
 class ThrowingTrack:
-    def __init__(self, track_id, score_start, score_max) -> None:
+    def __init__(self, track_id, score_start, score_max, motor) -> None:
         logging.debug("ThrowingTrack: Initializing Track ID:%s" %(track_id))
         self.track_id = track_id
         self.score_start = score_start
         self.score_max = score_max
         self.score = self.score_start
+        self.motor = motor
 
     def get_track_id(self) -> int:
         return self.track_id
 
     def add_score(self, value) -> int:
         self.score += value
+        self.motor.run_async(TurnDirection.CLOCKWISE, 100, 2000)
         return self.score
 
     def set_score(self, value) -> int:
@@ -59,6 +66,9 @@ class ThrowingTrack:
         if (self.score >= self.score_max):
             return True
         return False
+
+    def pause_motor(self):
+        self.motor.pause_async_thread()
 
 
 

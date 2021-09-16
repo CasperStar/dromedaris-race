@@ -23,13 +23,13 @@ GLOBAL_SENSOR_MAPPING = ( MicroSwitch(0, 1, 0x20,  0), MicroSwitch(0, 2, 0x20,  
                          #MicroSwitch(4, 1, 0x21,  0), MicroSwitch(4, 2, 0x21, 01), MicroSwitch(4, 3, 0x21,  2), # Track 5
                          #MicroSwitch(5, 1, 0x21,  3), MicroSwitch(5, 2, 0x21, 04), MicroSwitch(5, 3, 0x21,  5), # Track 6
 
-GLOBAL_MOTOR_MAPPING = ( MotorController(1, RaspberryPinPWM(18, 100), ExtenderPin(0x20,  6, IODirection.OUTPUT), ExtenderPin(0x20,  7, IODirection.OUTPUT)),) # TESTING 1
-                         #MotorController(1, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  0, IODirection.OUTPUT), ExtenderPin(0x22,  1, IODirection.OUTPUT)), # Track 1
-                         #MotorController(2, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  2, IODirection.OUTPUT), ExtenderPin(0x22,  3, IODirection.OUTPUT)), # Track 2
-                         #MotorController(3, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  4, IODirection.OUTPUT), ExtenderPin(0x22,  5, IODirection.OUTPUT)), # Track 3
-                         #MotorController(4, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  6, IODirection.OUTPUT), ExtenderPin(0x22,  7, IODirection.OUTPUT)), # Track 4
-                         #MotorController(5, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  8, IODirection.OUTPUT), ExtenderPin(0x22,  9, IODirection.OUTPUT)), # Track 5
-                         #MotorController(6, RaspberryPinPWM(18, 100), ExtenderPin(0x22, 10, IODirection.OUTPUT), ExtenderPin(0x22, 11, IODirection.OUTPUT))) # Track 6
+GLOBAL_MOTOR_MAPPING = ( MotorController(0, RaspberryPinPWM(8, 100), ExtenderPin(0x20,  6, IODirection.OUTPUT), ExtenderPin(0x20,   7, IODirection.OUTPUT)), # TESTING 1
+                         MotorController(1, RaspberryPinPWM(10, 100), ExtenderPin(0x20,  9, IODirection.OUTPUT), ExtenderPin(0x20,  10, IODirection.OUTPUT))) # Track 1
+                         #MotorController(1, RaspberryPinPWM(12, 100), ExtenderPin(0x22,  2, IODirection.OUTPUT), ExtenderPin(0x22,  3, IODirection.OUTPUT)), # Track 2
+                         #MotorController(2, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  4, IODirection.OUTPUT), ExtenderPin(0x22,  5, IODirection.OUTPUT)), # Track 3
+                         #MotorController(3, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  6, IODirection.OUTPUT), ExtenderPin(0x22,  7, IODirection.OUTPUT)), # Track 4
+                         #MotorController(4, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  8, IODirection.OUTPUT), ExtenderPin(0x22,  9, IODirection.OUTPUT)), # Track 5
+                         #MotorController(5, RaspberryPinPWM(18, 100), ExtenderPin(0x22, 10, IODirection.OUTPUT), ExtenderPin(0x22, 11, IODirection.OUTPUT))) # Track 6
 
 # Setup Main Class
 class DromedarisRace:
@@ -42,7 +42,7 @@ class DromedarisRace:
 
         self.sensor_event_queue = queue.Queue()
         self.sensor_container = SensorContainer(GLOBAL_EXTENDER_MAPPING, GLOBAL_SENSOR_MAPPING, self.sensor_event_queue)
-        self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE)
+        self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
 
     def __process_sensor_events(self):
         sensor_event = self.sensor_event_queue.get()
@@ -62,13 +62,15 @@ class DromedarisRace:
         track = self.__process_sensor_events()
         if (track != None):
             self.track_container.print_score_overview() # Score has changed, so print score overview.
-            if (track.reached_max_score()):
+            if (track.reached_max_score() == True):
                 logging.info("DromedarisRace: Winner is Track ID:{:02} Total Score:{:02}".format(track.get_track_id(), track.get_score()))
                 self.__pause()
 
     def __pause(self):
         sensor_poller = self.sensor_container.get_sensor_poller()
         sensor_poller.stop()
+
+        self.track_container.pause_motors()
 
     def __reset(self):
         self.__pause()

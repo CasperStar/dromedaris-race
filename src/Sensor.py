@@ -26,8 +26,6 @@ class SensorEvent:
     def get_edge_event(self) -> int:
         return self.edge_event
 
-    def get_event_info(self) -> str: # TODO: DEBUG remove
-        return ("T:%s S:%s (%s)" %(self.track_id, self.sensor_id, self.edge_event.name))
 
 class MicroSwitch:
     def __init__(self, track_id, sensor_id, device_addr, pin_number) -> None:
@@ -47,7 +45,7 @@ class MicroSwitch:
             event = EdgeEventEnum.EDGE_DETECT_RISING
         elif (updated_bool == False and self.previous_value == True):
             event = EdgeEventEnum.EDGE_DETECT_FALLING
-        
+
         #logging.debug("Polling MicroSwitch ID:%s (%s)" %(self.sensor_id, event.name)) # TODO: ENABLE IF NEEDED
         self.previous_value = updated_bool
         return SensorEvent(self.track_id, self.sensor_id, event)
@@ -119,6 +117,6 @@ class SensorPoller:
         self.polling_thread.start()
 
     def stop(self) -> None:
-        logging.debug("SensorPoller: Stopping polling thread")
+        logging.info("SensorPoller: Stopping polling thread")
         self.polling_thread_running.clear()
         self.polling_thread.join()

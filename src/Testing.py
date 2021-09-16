@@ -1,80 +1,28 @@
 
-
-
-from enum import Enum
-import abc 
-
-class IOType(Enum):
-    IO_EXTENDER_DIGITAL  = 0
-    IO_RASPBERRY_DIGITAL = 1
-    IO_RASPBERRY_PWM     = 2
-
-class IODefinition:
-    def __init__(self, io_type) -> None:
-        pass
-
-class IOController():
-    def __init__(self) -> None:
-        pass
-
-    def set_pin(self, ) -> None:
-        pass
-
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BOARD)
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# [Digital Pins]
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-from IOExtender import MCP23017
-
-class IODirection(Enum):
-    INPUT  = 0
-    OUTPUT = 1
-
-class DigitalPin(abc.ABC):
-    @abc.abstractmethod
-    def set(self, value):
-        pass
-
-    @abc.abstractmethod
-    def get(self):
-        pass
-
-class RaspberryPin(DigitalPin):
-    def __init__(self, pin, direction) -> None:
-        self.direction = direction
-        self.pin = pin
-        if (direction == IODirection.OUTPUT):
-            GPIO.setup(pin, GPIO.OUT)
-        elif (direction == IODirection.INPUT):
-            GPIO.setup(pin, GPIO.IN)
-
-    def set(self, value):
-        if (self.direction == IODirection.OUTPUT):
-            GPIO.output(self.pin, value)
-        else:
-            raise Exception("RaspberryPin: pin {:02} setting an input!".format(self.pin))
-
-    def get(self) -> bool:
-        return GPIO.input(self.pin)
-
-
-class ExtenderPin(DigitalPin):
-    def __init__(self, device_addr, pin, direction) -> None:
-        pass
-
-    def set(self, value):
-        pass
-
-    def get(self):
-        pass
-
-    
-
-
+from datetime import datetime
+import time
 
 if (__name__ == "__main__"):
-    game = RaspberryPin(0x20, 3)
+    current_time = datetime.now().microsecond
+    print("Time1: {}".format(current_time))
+    time.sleep(1)
+    
+    prev_time = current_time
+    current_time = datetime.now().microsecond
+    delta = current_time - prev_time
+    print("Time2: {}".format(current_time))
+    print("Delta: {}".format(delta))
+
+
+    round(time.time() * 1000)
+
+    current_time = round(time.time() * 1000)
+    print("Time3: {}".format(current_time))
+    time.sleep(0.5)
+    
+    prev_time = current_time
+    current_time = round(time.time() * 1000)
+    delta = current_time - prev_time
+    print("Time4: {}".format(current_time))
+    print("Delta: {}".format(delta))
     
