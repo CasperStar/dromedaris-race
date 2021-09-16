@@ -4,8 +4,8 @@ import time
 import RPi.GPIO as GPIO
 
 from Sensor import MicroSwitch, SensorContainer, EdgeEventEnum
-from IOExtender import MCP23017, RaspberryPinPWM, ExtenderPin, IODirection
-from MotorController import MotorController
+from IOControl import MCP23017, RaspberryPinPWM, ExtenderPin, IODirection
+from Motor import DCMotor
 from ThrowingTrack import TrackContainer
 
 
@@ -23,13 +23,12 @@ GLOBAL_SENSOR_MAPPING = ( MicroSwitch(0, 1, 0x20,  0, 500), MicroSwitch(0, 2, 0x
                          #MicroSwitch(4, 1, 0x21,  0, 500), MicroSwitch(4, 2, 0x21, 01, 500), MicroSwitch(4, 3, 0x21,  2, 500), # Track 5
                          #MicroSwitch(5, 1, 0x21,  3, 500), MicroSwitch(5, 2, 0x21, 04, 500), MicroSwitch(5, 3, 0x21,  5, 500), # Track 6
 
-GLOBAL_MOTOR_MAPPING = ( MotorController(0, RaspberryPinPWM(8, 100), ExtenderPin(0x20,  6, IODirection.OUTPUT), ExtenderPin(0x20,   7, IODirection.OUTPUT)), # TESTING 1
-                         MotorController(1, RaspberryPinPWM(10, 100), ExtenderPin(0x20,  9, IODirection.OUTPUT), ExtenderPin(0x20,  10, IODirection.OUTPUT))) # Track 1
-                         #MotorController(1, RaspberryPinPWM(12, 100), ExtenderPin(0x22,  2, IODirection.OUTPUT), ExtenderPin(0x22,  3, IODirection.OUTPUT)), # Track 2
-                         #MotorController(2, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  4, IODirection.OUTPUT), ExtenderPin(0x22,  5, IODirection.OUTPUT)), # Track 3
-                         #MotorController(3, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  6, IODirection.OUTPUT), ExtenderPin(0x22,  7, IODirection.OUTPUT)), # Track 4
-                         #MotorController(4, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  8, IODirection.OUTPUT), ExtenderPin(0x22,  9, IODirection.OUTPUT)), # Track 5
-                         #MotorController(5, RaspberryPinPWM(18, 100), ExtenderPin(0x22, 10, IODirection.OUTPUT), ExtenderPin(0x22, 11, IODirection.OUTPUT))) # Track 6
+GLOBAL_MOTOR_MAPPING = ( DCMotor(0, RaspberryPinPWM( 8, 100), ExtenderPin(0x20,   6, IODirection.OUTPUT), ExtenderPin(0x20,   7, IODirection.OUTPUT)), # Track 1
+                         DCMotor(1, RaspberryPinPWM(10, 100), ExtenderPin(0x20,  14, IODirection.OUTPUT), ExtenderPin(0x20,  15, IODirection.OUTPUT))) # Track 2
+                         #DCMotor(2, RaspberryPinPWM(12, 100), ExtenderPin(0x22,  4, IODirection.OUTPUT), ExtenderPin(0x22,  5, IODirection.OUTPUT)), # Track 3
+                         #DCMotor(3, RaspberryPinPWM(16, 100), ExtenderPin(0x22,  6, IODirection.OUTPUT), ExtenderPin(0x22,  7, IODirection.OUTPUT)), # Track 4
+                         #DCMotor(4, RaspberryPinPWM(18, 100), ExtenderPin(0x22,  8, IODirection.OUTPUT), ExtenderPin(0x22,  9, IODirection.OUTPUT)), # Track 5
+                         #DCMotor(5, RaspberryPinPWM(22, 100), ExtenderPin(0x22, 10, IODirection.OUTPUT), ExtenderPin(0x22, 11, IODirection.OUTPUT))) # Track DirectCurrentMotor
 
 # Setup Main Class
 class DromedarisRace:

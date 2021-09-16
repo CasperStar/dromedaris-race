@@ -1,7 +1,7 @@
 import logging, sys
 
 from Sensor import EdgeEventEnum
-from MotorController import MotorController, TurnDirection
+from Motor import DCMotor, TurnDirection
 
 class TrackContainer:
     def __init__(self, number_of_tracks, score_start, score_max, motor_mapping) -> None:
