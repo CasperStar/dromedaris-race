@@ -2,6 +2,7 @@ import logging, sys
 import threading, queue
 import time
 import RPi.GPIO as GPIO
+import requests
 
 from Sensor import MicroSwitch, SensorContainer, EdgeEventEnum
 from IOControl import MCP23017, RaspberryPinPWM, ExtenderPin, IODirection
@@ -39,6 +40,7 @@ class DromedarisRace:
         self.START_SCORE      = 0
         self.MAX_SCORE        = 25
 
+        self.UPDATE_URL = "https://dromedarisrace.nl/api/updateResults"
         self.sensor_event_queue = queue.Queue()
         self.sensor_container = SensorContainer(GLOBAL_EXTENDER_MAPPING, GLOBAL_SENSOR_MAPPING, self.sensor_event_queue)
         self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
@@ -63,6 +65,14 @@ class DromedarisRace:
             self.track_container.print_score_overview() # Score has changed, so print score overview.
             if (track.reached_max_score() == True):
                 logging.info("DromedarisRace: Winner is Track ID:{:02} Total Score:{:02}".format(track.get_track_id(), track.get_score()))
+
+
+                try:
+                    payload = {'lane': (track.get_track_id() +1) }
+                    response = requests.post(self.UPDATE_URL, data=payload)
+                except Exception as e:
+                    logging.info("Something went wrong")
+
                 self.__pause()
 
     def __pause(self):
