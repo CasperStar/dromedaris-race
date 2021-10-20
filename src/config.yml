@@ -1,0 +1,18 @@
+--- # Dromedaris Race Config
+
+
+DromedarisRaceConfig:
+
+  ExtenderMapping:
+    MCP23017:
+      DeviceAddress: 0x20
+    MCP23017:
+      DeviceAddress: 0x21
+
+  # SensorMapping:
+  #   - MicroSwitch:
+  #       TrackId: 1
+  #       SensorId: 1
+  #   - MicroSwitch:
+  #       TrackId: 1
+  #       SensorId: 2
