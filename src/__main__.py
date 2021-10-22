@@ -2,10 +2,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
+import threading, queue
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from ConfigParser import ConfigParser
+
+
+from ConfigLoader import ConfigLoader
 
 # TODO: Remove debug
 import time
@@ -21,8 +25,23 @@ class GameContext:
     def __init__(self, state: State) -> None:
         logging.debug(f"{type(self).__name__}: Initializing")
 
-        self.ConfigLoader = ConfigParser()
-        self.ConfigLoader.LoadConfig2("./config.yml")
+        self.ConfigLoader = ConfigLoader()
+        self.ConfigLoader.LoadConfig("./config.yml")
+
+        config = self.ConfigLoader.GetLoadedConfig()
+        print(config.LaneMapping)
+        print(config.ExtenderMapping)
+        print(config.SensorMapping)
+        print(config.MotorMapping)
+
+        exit()
+        # self.NUMBER_OF_TRACKS = 2
+        # self.START_SCORE      = 0
+        # self.MAX_SCORE        = 25
+
+        self._sensor_event_queue = queue.Queue()
+        # self.sensor_container = SensorContainer(GLOBAL_EXTENDER_MAPPING, GLOBAL_SENSOR_MAPPING, self.sensor_event_queue)
+        # self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
 
         self.transition_to(state)
 

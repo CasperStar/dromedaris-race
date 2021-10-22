@@ -1,18 +1,39 @@
 --- # Dromedaris Race Config
 
-
-DromedarisRaceConfig:
-
-  ExtenderMapping:
-    MCP23017:
+ExtenderMapping:
+  - MCP23017:
       DeviceAddress: 0x20
-    MCP23017:
+      RegisterA: 
+        Direction: 0b00000000
+        Pullup:    0b00000000
+      RegisterB: 
+        Direction: 0b00000000
+        Pullup:    0b00000000
+  - MCP23017:
       DeviceAddress: 0x21
+      RegisterA: 
+        Direction: 0b00000000
+        Pullup:    0b00000000
+      RegisterB: 
+        Direction: 0b00000001
+        Pullup:    0b00000010
 
-  # SensorMapping:
-  #   - MicroSwitch:
-  #       TrackId: 1
-  #       SensorId: 1
-  #   - MicroSwitch:
-  #       TrackId: 1
-  #       SensorId: 2
+SensorMapping:
+  - MicroSwitch:
+      TrackId: 1
+      SensorId: 1
+      DeviceAddress: 0x20 
+      PinNumber: 0 
+      DebounceDelay: 100
+  - MicroSwitch:
+      TrackId: 1
+      SensorId: 2
+      DeviceAddress: 0x20 
+      PinNumber: 1 
+      DebounceDelay: 100
+  - MicroSwitch:
+      TrackId: 1
+      SensorId: 3
+      DeviceAddress: 0x20 
+      PinNumber: 2
+      DebounceDelay: 100
