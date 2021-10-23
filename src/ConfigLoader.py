@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from IOExtender import MCP23017
 from Sensor import MicroSwitch
+from Lane import Lane
 
 
 Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "MotorMapping"])
@@ -12,6 +13,8 @@ Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping"
 class ConfigLoader:
 
     def __init__(self):
+        logging.debug(f"{type(self).__name__}: Initializing")
+        self._lane_mapping = list()
         self._extender_mapping = list()
         self._sensor_mapping = list()
 
@@ -19,6 +22,9 @@ class ConfigLoader:
         try:
             with open(config_path) as stream:
                 dataMap = yaml.safe_load(stream)
+
+            lane_mapping = dataMap.get("LaneMapping")
+            self.ProcessLaneMapping(lane_mapping)
 
             extender_mapping = dataMap.get("ExtenderMapping")
             self.ProcessExtenderMapping(extender_mapping)
@@ -32,8 +38,16 @@ class ConfigLoader:
             exit(-1)
 
     def GetLoadedConfig(self) -> Config:
+        config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, [])
+        logging.debug(f"{type(self).__name__}: Returned Config: {config}")
+        return config
 
-        return Config(1, self._extender_mapping, self._sensor_mapping, 2)
+    def ProcessLaneMapping(self, mapping):
+        for lane in mapping:
+            lane_data = lane.get('Lane')
+            if (lane_data != None):
+                self._lane_mapping.append(self.ConstructLane(lane_data))
+                continue
 
     def ProcessExtenderMapping(self, mapping):
         for extender in mapping:
@@ -53,6 +67,15 @@ class ConfigLoader:
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+    def ConstructLane(self, data) -> int:
+        lane_id     = data.get("LaneId")
+        score_start = data.get("ScoreStart")
+        score_end   = data.get("ScoreEnd")
+        motor_id    = data.get("MotorId")
+
+        logging.debug(f"{type(self).__name__}: Constructing Lane {lane_id}, {score_start}, {score_end}, {motor_id}")
+        return Lane(lane_id, score_start, score_end, motor_id)
 
     def ConstructMCP23017(self, data) -> int:
         device_address  = data.get("DeviceAddress")

@@ -1,24 +1,24 @@
 import logging
 from IOControl import IODirection, DigitalPin
 
-# import smbus
-# GLOBAL_I2C_BUS = smbus.SMBus(1)
+import smbus
+GLOBAL_I2C_BUS = smbus.SMBus(1)
 
-class TestSMBus:
-    def __init__(self, a):
-        pass
+# class TestSMBus:
+#     def __init__(self, a):
+#         pass
 
-    def read_byte_data(self, add, register):
-        # byte = self.bus.read_byte_data(self.device_addr, register)
-        # logging.debug("MCP23017: ID:0x{:02X} Reading register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
-        # return byte
-        pass
+#     def read_byte_data(self, add, register):
+#         # byte = self.bus.read_byte_data(self.device_addr, register)
+#         # logging.debug("MCP23017: ID:0x{:02X} Reading register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
+#         # return byte
+#         return 0
 
-    def write_byte_data(self, device_addr, register, byte):
-        # logging.debug("MCP23017: ID:0x{:02X} Writing register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
-        # self.bus.write_byte_data(self.device_addr, register, byte)
-        pass
-GLOBAL_I2C_BUS = TestSMBus(1)
+#     def write_byte_data(self, device_addr, register, byte):
+#         # logging.debug("MCP23017: ID:0x{:02X} Writing register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
+#         # self.bus.write_byte_data(self.device_addr, register, byte)
+#         pass
+# GLOBAL_I2C_BUS = TestSMBus(1)
 
 class ExtenderContainer:
     def __init__(self, extender_mapping) -> None:

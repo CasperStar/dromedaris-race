@@ -1,7 +1,7 @@
 import logging, sys
 import threading, queue, time
 
-from IOControl import RaspberryPin, RaspberryPinPWM, IODirection
+from IORaspberry import RaspberryPin, RaspberryPinPWM, IODirection
 from enum import Enum
 
 class TurnDirection(Enum):

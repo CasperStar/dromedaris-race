@@ -97,6 +97,7 @@ class SensorContainer:
     def __update_event_queue(self, sensor_event):
         if (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_FALLING):
             self.sensor_event_queue.put(sensor_event)
+            logging.info(f"Adding to event queue: {sensor_event}")
         #elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_RISING):
         #    self.sensor_event_queue.put(sensor_event)
         # elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_NONE):
@@ -118,13 +119,35 @@ class SensorPoller:
             logging.debug("SensorPoller: Polling callback")
             self.callback()
 
+        logging.debug(f"{type(self).__name__} Stopped polling thread")
+
+
     def start(self) -> None:
-        logging.debug("SensorPoller: Starting polling thread")
+        #logging.debug("SensorPoller: Starting polling thread") // TODO: This can be uncommented again if the first problem when this is called is resolved
         self.polling_thread_running.set()
-        self.polling_thread = threading.Thread(target=self.__polling_thread, args=(self.polling_thread_running,))
-        self.polling_thread.start()
+        if (not self.polling_thread.is_alive()):
+            self.polling_thread.start()
 
     def stop(self) -> None:
         logging.info("SensorPoller: Stopping polling thread")
         self.polling_thread_running.clear()
-        self.polling_thread.join()
+        if (self.polling_thread.is_alive()):
+            self.polling_thread.join()
+
+
+class SensorEventProcessor:
+    def __init__(self, event_queue, lane_container):
+        self._event_queue = event_queue
+        self._lane_container = lane_container
+
+    def process_sensor_events(self):
+        if (not self._event_queue.empty()):
+            sensor_event = self._event_queue.get_nowait()
+
+            if (EdgeEventEnum.EDGE_DETECT_FALLING == sensor_event.get_edge_event()):
+                lane = self._lane_container.get_track(sensor_event.get_track_id())
+                track_total_score = lane.add_score(1) # TODO: Make score variable and configurable per sensor 
+                logging.info(f"{type(self).__name__}: Lane:{lane.get_track_id()} Sensor:{sensor_event.get_sensor_id()} TotalScore:{track_total_score}")
+                return lane
+
+        return None

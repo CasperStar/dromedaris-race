@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 import threading, queue
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 from ConfigLoader import ConfigLoader
 
@@ -13,7 +13,8 @@ from ConfigLoader import ConfigLoader
 import time
 
 
-from Sensor import SensorContainer
+from Sensor import SensorContainer, SensorEventProcessor
+from Lane import LaneContainer
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -31,24 +32,9 @@ class GameContext:
         self.ConfigLoader.LoadConfig("./config.yml")
         config = self.ConfigLoader.GetLoadedConfig()
 
-        print(config.LaneMapping)
-        print(config.ExtenderMapping)
-        print(config.SensorMapping)
-        print(config.MotorMapping)
-
         self._sensor_event_queue = queue.Queue()
         self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
-        #self._lane_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
-
-        exit() # TODO: Debug remove 
-
-        # self.NUMBER_OF_TRACKS = 2
-        # self.START_SCORE      = 0
-        # self.MAX_SCORE        = 25
-
-        self._sensor_event_queue = queue.Queue()
-        # self.sensor_container = SensorContainer(GLOBAL_EXTENDER_MAPPING, GLOBAL_SENSOR_MAPPING, self.sensor_event_queue)
-        # self.track_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
+        self._lane_container   = LaneContainer(config.LaneMapping, config.MotorMapping) # TODO: Motor and Lane still need to get coupeled
 
         self.transition_to(state)
 
@@ -69,6 +55,10 @@ class GameContext:
 
 
 class State(ABC):
+
+    def __init__(self):
+        logging.info(f"Initializing State Machine State: {type(self).__name__}")
+
     @property
     def context(self) -> GameContext:
         return self._context
@@ -83,23 +73,28 @@ class State(ABC):
 
 class PausingState(State):
     def process(self) -> None:
-        logging.debug(f"Start Processing {type(self).__name__}")
-        logging.debug(f"Start tranision to next state!")
+        sensor_poller = self.context._sensor_container.get_sensor_poller()
+        sensor_poller.stop()
+
         time.sleep(3)
         self.context.transition_to(RunningState())
 
 class RunningState(State):
     def process(self) -> None:
-        logging.debug(f"Start Processing {type(self).__name__}")
-        logging.debug(f"Start tranision to next state!")
-        time.sleep(3)
-        self.context.transition_to(ResettingState())
+        sensor_poller = self.context._sensor_container.get_sensor_poller()
+        sensor_poller.start() # TODO: This should be moved to the init of the class instead of the processing function. Have some problems with the inheritance
+
+        processor = SensorEventProcessor(self.context._sensor_event_queue, self.context._lane_container)
+        scored_lane = processor.process_sensor_events() 
+
+        if (scored_lane != None):
+            if (scored_lane.reached_max_score()):
+                self.context.transition_to(PausingState())
 
 class ResettingState(State):
     def process(self) -> None:
         logging.debug(f"Start Processing {type(self).__name__}")
-        logging.debug(f"Start tranision to next state!")
-        time.sleep(3)
+#        time.sleep(1)
         self.context.transition_to(PausingState())
 
 

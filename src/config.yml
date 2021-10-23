@@ -1,39 +1,170 @@
 --- # Dromedaris Race Config
 
+LaneMapping:
+  - Lane:
+      LaneId: 0
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 1
+  - Lane:
+      LaneId: 1
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 2
+  - Lane:
+      LaneId: 2
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 3
+  - Lane:
+      LaneId: 3
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 4
+  - Lane:
+      LaneId: 4
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 5
+  - Lane:
+      LaneId: 5
+      ScoreStart: 0
+      ScoreEnd: 25
+      MotorId: 6
+
 ExtenderMapping:
   - MCP23017:
       DeviceAddress: 0x20
       RegisterA: 
-        Direction: 0b00000000
-        Pullup:    0b00000000
+        Direction: 0b00111111
+        Pullup:    0b00111111
       RegisterB: 
-        Direction: 0b00000000
-        Pullup:    0b00000000
+        Direction: 0b11111100
+        Pullup:    0b11111100
   - MCP23017:
       DeviceAddress: 0x21
       RegisterA: 
-        Direction: 0b00000000
-        Pullup:    0b00000000
+        Direction: 0b11100000
+        Pullup:    0b11100000
       RegisterB: 
-        Direction: 0b00000001
-        Pullup:    0b00000010
+        Direction: 0b00000111
+        Pullup:    0b00000111
 
 SensorMapping:
+# Track 1
+  - MicroSwitch:
+      TrackId: 0
+      SensorId: 1
+      DeviceAddress: 0x20 
+      PinNumber: 15
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 0
+      SensorId: 2
+      DeviceAddress: 0x20 
+      PinNumber: 14 
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 0
+      SensorId: 3
+      DeviceAddress: 0x20 
+      PinNumber: 13
+      DebounceDelay: 500
+# Track 2
   - MicroSwitch:
       TrackId: 1
       SensorId: 1
       DeviceAddress: 0x20 
-      PinNumber: 0 
-      DebounceDelay: 100
+      PinNumber: 12
+      DebounceDelay: 500
   - MicroSwitch:
       TrackId: 1
       SensorId: 2
       DeviceAddress: 0x20 
-      PinNumber: 1 
-      DebounceDelay: 100
+      PinNumber: 11
+      DebounceDelay: 500
   - MicroSwitch:
       TrackId: 1
       SensorId: 3
       DeviceAddress: 0x20 
+      PinNumber: 10
+      DebounceDelay: 500
+  # Track 3
+  - MicroSwitch:
+      TrackId: 2
+      SensorId: 1
+      DeviceAddress: 0x21
+      PinNumber: 7
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 2
+      SensorId: 2
+      DeviceAddress: 0x21
+      PinNumber: 6
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 2
+      SensorId: 3
+      DeviceAddress: 0x21
+      PinNumber: 5
+      DebounceDelay: 500
+
+# Track 4
+  - MicroSwitch:
+      TrackId: 3
+      SensorId: 1
+      DeviceAddress: 0x20 
+      PinNumber: 0
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 3
+      SensorId: 2
+      DeviceAddress: 0x20 
+      PinNumber: 1
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 3
+      SensorId: 3
+      DeviceAddress: 0x20 
       PinNumber: 2
-      DebounceDelay: 100
+      DebounceDelay: 500
+
+# Track 5
+  - MicroSwitch:
+      TrackId: 4
+      SensorId: 1
+      DeviceAddress: 0x20 
+      PinNumber: 3
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 4
+      SensorId: 2
+      DeviceAddress: 0x20 
+      PinNumber: 4
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 4
+      SensorId: 3
+      DeviceAddress: 0x20 
+      PinNumber: 5
+      DebounceDelay: 500
+
+  # Track 6
+  - MicroSwitch:
+      TrackId: 5
+      SensorId: 1
+      DeviceAddress: 0x21
+      PinNumber: 8
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 5
+      SensorId: 2
+      DeviceAddress: 0x21
+      PinNumber: 9
+      DebounceDelay: 500
+  - MicroSwitch:
+      TrackId: 5
+      SensorId: 3
+      DeviceAddress: 0x21
+      PinNumber: 10
+      DebounceDelay: 500
