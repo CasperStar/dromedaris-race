@@ -7,12 +7,13 @@ import threading, queue
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-
-
 from ConfigLoader import ConfigLoader
 
 # TODO: Remove debug
 import time
+
+
+from Sensor import SensorContainer
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -25,16 +26,22 @@ class GameContext:
     def __init__(self, state: State) -> None:
         logging.debug(f"{type(self).__name__}: Initializing")
 
+        # Read + Load Configuration 
         self.ConfigLoader = ConfigLoader()
         self.ConfigLoader.LoadConfig("./config.yml")
-
         config = self.ConfigLoader.GetLoadedConfig()
+
         print(config.LaneMapping)
         print(config.ExtenderMapping)
         print(config.SensorMapping)
         print(config.MotorMapping)
 
-        exit()
+        self._sensor_event_queue = queue.Queue()
+        self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
+        #self._lane_container = TrackContainer(self.NUMBER_OF_TRACKS, self.START_SCORE, self.MAX_SCORE, GLOBAL_MOTOR_MAPPING)
+
+        exit() # TODO: Debug remove 
+
         # self.NUMBER_OF_TRACKS = 2
         # self.START_SCORE      = 0
         # self.MAX_SCORE        = 25

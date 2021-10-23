@@ -4,7 +4,7 @@ import logging, sys
 import time 
 from enum import Enum
 
-from IOControl import ExtenderContainer
+from IOExtender import ExtenderContainer
 
 class EdgeEventEnum(Enum):
     EDGE_DETECT_NONE = 0

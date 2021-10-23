@@ -1,7 +1,11 @@
 import yaml
 import logging
-
 from collections import namedtuple
+
+
+from IOExtender import MCP23017
+from Sensor import MicroSwitch
+
 
 Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "MotorMapping"])
 
@@ -58,8 +62,7 @@ class ConfigLoader:
         reg_b_pullup    = data.get("RegisterB").get("Pullup")
 
         logging.debug(f"{type(self).__name__}: Constructing MCP23017 {device_address}, {reg_a_direction}, {reg_a_pullup}, {reg_b_direction}, {reg_b_pullup}")
-        #return MCP23017(device_address, reg_a_direction, reg_a_pullup, reg_a_pullup, reg_b_direction, reg_b_pullup)
-        return 111
+        return MCP23017(device_address, reg_a_direction, reg_a_pullup, reg_b_direction, reg_b_pullup)
 
     def ConstructMicroSwitch(self, data):
         track_id    = data.get("TrackId")
@@ -69,6 +72,5 @@ class ConfigLoader:
         debounce_time_ms = data.get("DebounceDelay")
  
         logging.debug(f"{type(self).__name__}: Constructing MicroSwitch {track_id}, {sensor_id}, {device_addr}, {pin_number}, {debounce_time_ms}") 
-        #return MicroSwitch(track_id, sensor_id, device_addr, pin_number, debounce_time_ms)
-        return 222
+        return MicroSwitch(track_id, sensor_id, device_addr, pin_number, debounce_time_ms)
 
