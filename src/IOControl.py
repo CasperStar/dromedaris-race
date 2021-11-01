@@ -3,6 +3,9 @@ import logging, random, sys
 import abc
 from enum import Enum
 
+import smbus
+GLOBAL_I2C_BUS = smbus.SMBus(1)
+
 class IODirection(Enum):
     OUTPUT = 0
     INPUT  = 1

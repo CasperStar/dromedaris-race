@@ -5,32 +5,32 @@ LaneMapping:
       LaneId: 0
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 1
+      MotorId: 0
   - Lane:
       LaneId: 1
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 2
+      MotorId: 1
   - Lane:
       LaneId: 2
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 3
+      MotorId: 2
   - Lane:
       LaneId: 3
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 4
+      MotorId: 3
   - Lane:
       LaneId: 4
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 5
+      MotorId: 4
   - Lane:
       LaneId: 5
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 6
+      MotorId: 5
 
 ExtenderMapping:
   - MCP23017:

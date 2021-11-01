@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 import threading, queue
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 from ConfigLoader import ConfigLoader
@@ -15,6 +16,7 @@ import time
 
 from Sensor import SensorContainer, SensorEventProcessor
 from Lane import LaneContainer
+from MotorControl import MotorController
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -34,6 +36,7 @@ class GameContext:
 
         self._sensor_event_queue = queue.Queue()
         self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
+        self._motor_controller = MotorController(0x04)
         self._lane_container   = LaneContainer(config.LaneMapping, config.MotorMapping) # TODO: Motor and Lane still need to get coupeled
 
         self.transition_to(state)

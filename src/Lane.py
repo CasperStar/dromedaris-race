@@ -1,18 +1,13 @@
 import logging, sys
+from MotorControl import MotorActionEnum
 
 from Sensor import EdgeEventEnum
 from Motor import DCMotor, TurnDirection
 
 class LaneContainer:
-    def __init__(self, lane_mapping, motor_mapping) -> None:
+    def __init__(self, lane_mapping, motor_controller) -> None:
         logging.debug(f"{type(self).__name__}: Initializing with {len(lane_mapping)} lanes")
-
         self.lanes = lane_mapping
-
-        # for it in lane_objects:
-        #     self._lanes.append(lane_objects)
-        # for i in range(0, number_of_tracks):
-        #     self.lanes.append(Lane(i, score_start, score_max,  motor_mapping[i]))
 
     def get_track(self, index):
         return self.lanes[index]
@@ -46,14 +41,14 @@ class Lane:
         self.score_start = score_start
         self.score_max = score_max
         self.score = self.score_start
-        self.motor = motor #TODO: Rework motor implemenation
+        self.motor = motor
 
     def get_track_id(self) -> int:
         return self.lane_id
 
     def add_score(self, value: int) -> int:
         self.score += value
-        #self.motor.run_async(TurnDirection.CLOCKWISE, 100, 2000) #TODO: Rework motor implemenation
+        self.motor.run_for(MotorActionEnum.TURN_CLOCKWISE, 100, 1000)
         return self.score
 
     def set_score(self, value) -> int:
@@ -69,6 +64,6 @@ class Lane:
         return False
 
     def pause_motor(self):
-        #self.motor.pause_async_thread() #TODO: Rework motor implemenation
+        self.motor.pause_thread()
         pass
 

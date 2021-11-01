@@ -1,8 +1,5 @@
 import logging
-from IOControl import IODirection, DigitalPin
-
-import smbus
-GLOBAL_I2C_BUS = smbus.SMBus(1)
+from IOControl import IODirection, DigitalPin, GLOBAL_I2C_BUS
 
 # class TestSMBus:
 #     def __init__(self, a):
