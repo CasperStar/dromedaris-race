@@ -1,36 +1,45 @@
 --- # Dromedaris Race Config
 
+MotorController:
+  Address: 0x04
+
 LaneMapping:
   - Lane:
       LaneId: 0
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 0
+      MotorSpeedPct: 66
+      MotorRunDurationMs: 5000
   - Lane:
       LaneId: 1
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 1
+      MotorSpeedPct: 75
+      MotorRunDurationMs: 10000
   - Lane:
       LaneId: 2
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 2
+      MotorSpeedPct: 75
+      MotorRunDurationMs: 4000
   - Lane:
       LaneId: 3
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 3
+      MotorSpeedPct: 25
+      MotorRunDurationMs: 10000
   - Lane:
       LaneId: 4
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 4
+      MotorSpeedPct: 100
+      MotorRunDurationMs: 4000
   - Lane:
       LaneId: 5
       ScoreStart: 0
       ScoreEnd: 25
-      MotorId: 5
+      MotorSpeedPct: 25
+      MotorRunDurationMs: 10000
 
 ExtenderMapping:
   - MCP23017:

@@ -24,7 +24,8 @@ class ConfigLoader:
             with open(config_path) as stream:
                 dataMap = yaml.safe_load(stream)
 
-            motor_controller = MotorController(0x04) # Should not be hardcoded
+            motor_controller_address = dataMap.get("MotorController").get('Address')
+            motor_controller = MotorController(motor_controller_address)
 
             lane_mapping = dataMap.get("LaneMapping")
             self.ProcessLaneMapping(lane_mapping, motor_controller)
@@ -75,12 +76,13 @@ class ConfigLoader:
         lane_id     = data.get("LaneId")
         score_start = data.get("ScoreStart")
         score_end   = data.get("ScoreEnd")
-        motor_id    = data.get("MotorId")
+        motor_speed = data.get("MotorSpeedPct")
+        motor_run_duration = data.get("MotorRunDurationMs")
 
-        motor = Motor(motor_controller, motor_id)
+        motor = Motor(motor_controller, lane_id) # Lane id is same as motor id
 
         logging.debug(f"{type(self).__name__}: Constructing Lane {lane_id}, {score_start}, {score_end}, {motor}")
-        return Lane(lane_id, score_start, score_end, motor)
+        return Lane(lane_id, score_start, score_end, motor, motor_speed, motor_run_duration)
 
     def ConstructMCP23017(self, data) -> int:
         device_address  = data.get("DeviceAddress")

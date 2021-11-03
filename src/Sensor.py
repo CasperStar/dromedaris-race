@@ -116,14 +116,13 @@ class SensorPoller:
 
     def __polling_thread(self, thread_running) -> None:
         while (self.polling_thread_running.is_set()):
-            logging.debug("SensorPoller: Polling callback")
+            #logging.debug("SensorPoller: Polling callback") # DEBUG: ENABLE IF NEEDED
             self.callback()
 
         logging.debug(f"{type(self).__name__} Stopped polling thread")
 
 
     def start(self) -> None:
-        #logging.debug("SensorPoller: Starting polling thread") // TODO: This can be uncommented again if the first problem when this is called is resolved
         self.polling_thread_running.set()
         if (not self.polling_thread.is_alive()):
             self.polling_thread.start()

@@ -6,7 +6,7 @@ from time import sleep
 from IOControl import GLOBAL_I2C_BUS
 
 class MotorActionEnum(Enum):
-    STOP_PASSIVE = 0,
+    STOP_PASSIVE = 0
     TURN_CLOCKWISE = 1
     TURN_ANTI_CLOCKWISE = 2
     STOP_ACTIVE = 3
@@ -19,11 +19,11 @@ class MotorController():
 
     def set_motor_speed(self, motor_id: int, speed: int):
         logging.debug(f"{type(self).__name__}: Setting Motor {motor_id} Speed {speed}")
-        self.bus.write_block_data(self.controller_address, motor_id, (0x010, speed))
+        self.bus.write_block_data(self.controller_address, motor_id, [0x010, speed])
 
     def set_motor_action(self, motor_id: int, action: MotorActionEnum):
         logging.debug(f"{type(self).__name__}: Setting Motor {motor_id} Action {action}")
-        self.bus.write_block_data(self.controller_address, motor_id, (0x020, action))
+        self.bus.write_block_data(self.controller_address, motor_id, [0x020, action.value])
 
 
 MotorQueueInfo = namedtuple('MotorQueueInfo', ['action', 'speed', 'ms'])
@@ -69,8 +69,8 @@ class Motor():
         logging.debug(f"{type(self).__name__}: Thread Worker Stopping {self.motor_id}")
 
     def run_for(self, action: MotorActionEnum, speed: int, ms: int):
-        logging.debug(f"{type(self).__name__}: Running {self.motor_id} for {ms}")
         info = MotorQueueInfo(action, speed, ms)
+        logging.debug(f"{type(self).__name__}: Adding Motor {self.motor_id} Event to Queue. Action:{action} Speed:{speed} Duration:{ms}")
         self.thread_queue.put(info)
 
     def stop_thread(self):
@@ -88,23 +88,3 @@ class Motor():
     def pause_thread(self):
         logging.debug(f"{type(self).__name__}: Pausing Thread {self.motor_id}")
         self.thread_pausing.set()
-
-# TODO: DEBUG REMOVE
-# logging.basicConfig(level=logging.DEBUG)
-# if __name__ == "__main__":
-    
-#     c = MotorController(0x04)
-#     m = Motor(c, 2)
-
-#     m.run_for(MotorActionEnum.TURN_CLOCKWISE, 100, 2000)
-#     m.run_for(MotorActionEnum.TURN_ANTI_CLOCKWISE, 75, 2000)
-#     m.run_for(MotorActionEnum.STOP_ACTIVE, 0, 2000)
-#     m.run_for(MotorActionEnum.TURN_CLOCKWISE, 25, 2000)
-
-#     sleep(1)
-#     m.pause_thread()
-#     sleep(5)
-#     m.start_thread()
-#     sleep(10)
-#     m.stop_thread()
-

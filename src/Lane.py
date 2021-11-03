@@ -2,7 +2,7 @@ import logging, sys
 from MotorControl import MotorActionEnum
 
 from Sensor import EdgeEventEnum
-from Motor import DCMotor, TurnDirection
+from MotorControl import Motor
 
 class LaneContainer:
     def __init__(self, lane_mapping, motor_controller) -> None:
@@ -35,20 +35,22 @@ class LaneContainer:
             track.pause_motor()
 
 class Lane:
-    def __init__(self, lane_id: int, score_start: int, score_max: int, motor) -> None:
+    def __init__(self, lane_id: int, score_start: int, score_max: int, motor: Motor, motor_speed: int, motor_duration_ms: int) -> None:
         logging.debug(f"{type(self).__name__}: Initializing Lane ID:{lane_id}")
         self.lane_id = lane_id
         self.score_start = score_start
         self.score_max = score_max
         self.score = self.score_start
         self.motor = motor
+        self.motor_speed_pct = motor_speed
+        self.motor_run_duration_ms = motor_duration_ms
 
     def get_track_id(self) -> int:
         return self.lane_id
 
     def add_score(self, value: int) -> int:
         self.score += value
-        self.motor.run_for(MotorActionEnum.TURN_CLOCKWISE, 100, 1000)
+        self.motor.run_for(MotorActionEnum.TURN_CLOCKWISE, self.motor_speed_pct, self.motor_run_duration_ms)
         return self.score
 
     def set_score(self, value) -> int:

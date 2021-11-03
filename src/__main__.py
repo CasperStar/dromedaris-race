@@ -6,7 +6,7 @@ import threading, queue
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from ConfigLoader import ConfigLoader
 

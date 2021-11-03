@@ -1,6 +1,7 @@
 import logging
 from IOControl import IODirection, DigitalPin, GLOBAL_I2C_BUS
 
+# TODO: Replace with mocking class
 # class TestSMBus:
 #     def __init__(self, a):
 #         pass
@@ -182,7 +183,7 @@ class MCP23017:
 
     def read_regsiter(self, register):
         byte = self.bus.read_byte_data(self.device_addr, register)
-        logging.debug("MCP23017: ID:0x{:02X} Reading register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
+        #logging.debug("MCP23017: ID:0x{:02X} Reading register 0x{:02X} ({:08b})".format(self.device_addr, register, byte)) # DEBUG: ENABLE IF NEEDED
         return byte
 
     def write_regsiter(self, register, byte):
