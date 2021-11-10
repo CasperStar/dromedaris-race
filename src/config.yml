@@ -8,26 +8,26 @@ LaneMapping:
       LaneId: 0
       ScoreStart: 0
       ScoreEnd: 25
-      MotorSpeedPct: 66
-      MotorRunDurationMs: 5000
+      MotorSpeedPct: 100
+      MotorRunDurationMs: 4000
   - Lane:
       LaneId: 1
       ScoreStart: 0
       ScoreEnd: 25
-      MotorSpeedPct: 75
-      MotorRunDurationMs: 10000
+      MotorSpeedPct: 100
+      MotorRunDurationMs: 4000
   - Lane:
       LaneId: 2
       ScoreStart: 0
       ScoreEnd: 25
-      MotorSpeedPct: 75
+      MotorSpeedPct: 100
       MotorRunDurationMs: 4000
   - Lane:
       LaneId: 3
       ScoreStart: 0
       ScoreEnd: 25
-      MotorSpeedPct: 25
-      MotorRunDurationMs: 10000
+      MotorSpeedPct: 100
+      MotorRunDurationMs: 4000
   - Lane:
       LaneId: 4
       ScoreStart: 0
@@ -38,8 +38,8 @@ LaneMapping:
       LaneId: 5
       ScoreStart: 0
       ScoreEnd: 25
-      MotorSpeedPct: 25
-      MotorRunDurationMs: 10000
+      MotorSpeedPct: 100
+      MotorRunDurationMs: 4000
 
 ExtenderMapping:
   - MCP23017:

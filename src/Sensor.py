@@ -89,7 +89,7 @@ class SensorContainer:
     def __update_sensor(self, device_addr, reg_a, reg_b):
         for sensor in self.sensor_container:
             if (sensor.get_device_addr() == device_addr):
-                if (sensor.get_pin_number() <= 8):
+                if (sensor.get_pin_number() < 8):
                     self.__update_event_queue(sensor.update(reg_a))
                 else:
                     self.__update_event_queue(sensor.update(reg_b))
