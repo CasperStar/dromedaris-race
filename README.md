@@ -40,7 +40,6 @@ The following bullet point list shows improvements that still can be done to the
 - Add correct packaging / folder structure for a python project
 - Add SonarCloud when repo is public
 
-
 ## Technical Documentation
 
 ### Software
