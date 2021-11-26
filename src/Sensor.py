@@ -111,27 +111,39 @@ class SensorPoller:
     def __init__(self, callback) -> None:
         logging.debug("SensorPoller: Initializing")
         self.polling_thread_running = threading.Event()
+        self.polling_thread_process = threading.Event()
         self.polling_thread = threading.Thread(target=self.__polling_thread, args=(self.polling_thread_running,))
         self.callback = callback
 
+        self.start_thread()
+
     def __polling_thread(self, thread_running) -> None:
+        logging.debug(f"{type(self).__name__}: Starting polling thread")
+
         while (self.polling_thread_running.is_set()):
-            #logging.debug("SensorPoller: Polling callback") # DEBUG: ENABLE IF NEEDED
-            self.callback()
+            while (self.polling_thread_process.is_set()):
+                #logging.debug(f"{type(self).__name__}: Polling callback") # DEBUG: ENABLE IF NEEDED
+                self.callback()
 
-        logging.debug(f"{type(self).__name__} Stopped polling thread")
+        logging.debug(f"{type(self).__name__}: Stopping polling thread")
 
-
-    def start(self) -> None:
+    def start_thread(self) -> None:
         self.polling_thread_running.set()
-        if (not self.polling_thread.is_alive()):
-            self.polling_thread.start()
+        self.polling_thread.start()
 
-    def stop(self) -> None:
-        logging.info("SensorPoller: Stopping polling thread")
+    def stop_thread(self) -> None:
+        self.stop_processing(self)
         self.polling_thread_running.clear()
         if (self.polling_thread.is_alive()):
             self.polling_thread.join()
+
+    def start_processing(self) -> None:
+        #logging.debug(f"{type(self).__name__}: Start processing thread") # DEBUG: ENABLE IF NEEDED
+        self.polling_thread_process.set()
+
+    def stop_processing(self) -> None:
+        #logging.debug(f"{type(self).__name__}: Stop processing thread") # DEBUG: ENABLE IF NEEDED
+        self.polling_thread_process.clear()
 
 
 class SensorEventProcessor:

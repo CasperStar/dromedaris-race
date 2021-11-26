@@ -78,10 +78,10 @@ class MCP23017:
 
     def read_output_pin(self, pin):
         if (pin < 8):
-            return self.read_pin(self.GPIOA)
+            return self.read_pin(self.GPIOA, pin)
         else:
             pin = pin % 8
-            return self.read_pin(self.GPIOB)
+            return self.read_pin(self.GPIOB, pin)
 
     def read_output_register_a(self):
         return self.read_regsiter(self.GPIOA)
@@ -167,7 +167,7 @@ class MCP23017:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def read_pin(self, register, pin):
-        logging.debug("MCP23017: ID:0x{:02X} Reading pin {:02} from 0x{:02X}".format(self.device_addr, pin, register))
+        #logging.debug("MCP23017: ID:0x{:02X} Reading pin {:02} from 0x{:02X}".format(self.device_addr, pin, register))
         current_value = self.read_regsiter(register)
         return current_value & (1 << pin)
 

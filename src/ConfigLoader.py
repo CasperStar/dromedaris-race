@@ -7,9 +7,10 @@ from IOExtender import MCP23017
 from Sensor import MicroSwitch
 from Lane import Lane
 from MotorControl import MotorController, Motor
+from Button import Button
 
 
-Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "MotorMapping"])
+Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "MotorMapping", "ButtonMapping"])
 
 class ConfigLoader:
 
@@ -18,6 +19,7 @@ class ConfigLoader:
         self._lane_mapping = list()
         self._extender_mapping = list()
         self._sensor_mapping = list()
+        self._button_mapping  = list()
 
     def LoadConfig(self, config_path):
         try:
@@ -36,15 +38,18 @@ class ConfigLoader:
             sensor_mapping = dataMap.get("SensorMapping")
             (self.ProcessSensorMapping(sensor_mapping))
 
+            button_mapping = dataMap.get("ButtonMapping")
+            self.ProcessButtonMapping(button_mapping)
 
         except yaml.YAMLError as exception:
             print(exception)
             exit(-1)
 
     def GetLoadedConfig(self) -> Config:
-        config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, [])
+        config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, [], self._button_mapping)
         logging.debug(f"{type(self).__name__}: Returned Config: {config}")
         return config
+
 
     def ProcessLaneMapping(self, mapping, motor_controller):
         for lane in mapping:
@@ -65,6 +70,13 @@ class ConfigLoader:
             sensor_data = sensor.get('MicroSwitch')
             if (sensor_data != None):
                 self._sensor_mapping.append(self.ConstructMicroSwitch(sensor_data))
+                continue
+
+    def ProcessButtonMapping(self, mapping):
+        for button in mapping:
+            button_data = button.get('Button')
+            if (button_data != None):
+                self._button_mapping.append(self.ConstructButton(button_data))
                 continue
 
 
@@ -103,4 +115,12 @@ class ConfigLoader:
  
         logging.debug(f"{type(self).__name__}: Constructing MicroSwitch {track_id}, {sensor_id}, {device_addr}, {pin_number}, {debounce_time_ms}") 
         return MicroSwitch(track_id, sensor_id, device_addr, pin_number, debounce_time_ms)
+
+    def ConstructButton(self, data) -> int:
+        button_id   = data.get("ButtonId")
+        device_addr = data.get("DeviceAddress")
+        pin_number  = data.get("PinNumber")
+
+        logging.debug(f"{type(self).__name__}: Constructing Button {button_id}, {device_addr}, {pin_number}")
+        return Button(button_id, device_addr, pin_number)
 

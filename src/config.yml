@@ -3,6 +3,20 @@
 MotorController:
   Address: 0x04
 
+ButtonMapping:
+  - Button:
+      ButtonId: 0
+      DeviceAddress: 0x21
+      PinNumber: 12
+  - Button:
+      ButtonId: 1
+      DeviceAddress: 0x21
+      PinNumber: 13
+  - Button:
+      ButtonId: 2
+      DeviceAddress: 0x21
+      PinNumber: 14
+
 LaneMapping:
   - Lane:
       LaneId: 0
@@ -56,8 +70,8 @@ ExtenderMapping:
         Direction: 0b11100000
         Pullup:    0b11100000
       RegisterB: 
-        Direction: 0b00000111
-        Pullup:    0b00000111
+        Direction: 0b01110111
+        Pullup:    0b01110111
 
 SensorMapping:
 # Track 1
