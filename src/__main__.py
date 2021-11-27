@@ -123,12 +123,16 @@ class ResettingState(State):
         reset_led = self.context._led_mapping[3]
         reset_led.TurnOn() # TODO: Should be run only in the constructor
 
-        # Setting all motors back to starting processing and resetting scores
+        # Check if all motors events are processed
+        lane_container = self.context._lane_container
+        if (lane_container.all_motor_events_processed()):
+            lane_container.reset_scores_and_motors() # Set back all motors and scores
 
-        # Check Transition Conditions
-        pause_button = self.context._button_mapping[1]
-        if (pause_button.IsActive()):
+            while (not lane_container.all_motor_events_processed()):
+                pass # Wait until motors are set back to start position
+
             self.context.transition_to(PausingState())
+
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

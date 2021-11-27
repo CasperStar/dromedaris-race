@@ -25,14 +25,21 @@ class LaneContainer:
         for track in self.lanes:
             logging.info("Track ID: {:02} Score: {:02}".format(track.get_track_id(), track.get_score()))
 
-    def reset_scores(self):
-        logging.debug("TrackContainer: Reset all scores")
-        for track in self.lanes:
-            track.set_score(self.score_start)
+    def reset_scores_and_motors(self):
+        logging.debug("TrackContainer: Reset all scores and motors")
+        for lane in self.lanes:
+            lane.reset_score_and_motor()
+
+    def all_motor_events_processed(self) -> bool:
+        for lane in self.lanes:
+            if (not lane.all_motor_events_processed()):
+                return False
+
+        return True
 
     def pause_motors(self):
-        for track in self.lanes:
-            track.pause_motor()
+        for lane in self.lanes:
+            lane.pause_motor()
 
 class Lane:
     def __init__(self, lane_id: int, score_start: int, score_max: int, motor: Motor, motor_speed: int, motor_duration_ms: int) -> None:
@@ -52,6 +59,16 @@ class Lane:
         self.score += value
         self.motor.run_for(MotorActionEnum.TURN_CLOCKWISE, self.motor_speed_pct, self.motor_run_duration_ms)
         return self.score
+
+    def reset_score_and_motor(self):
+        accumulated_duration = self.motor_run_duration_ms * self.score
+        self.set_score(0)
+
+        if (accumulated_duration > 0):
+            self.motor.run_for(MotorActionEnum.TURN_ANTI_CLOCKWISE, self.motor_speed_pct, accumulated_duration)
+
+    def all_motor_events_processed(self) -> bool:
+        return self.motor.all_events_processed()
 
     def set_score(self, value) -> int:
         self.score = value
