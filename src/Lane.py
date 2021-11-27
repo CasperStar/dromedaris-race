@@ -5,7 +5,7 @@ from Sensor import EdgeEventEnum
 from MotorControl import Motor
 
 class LaneContainer:
-    def __init__(self, lane_mapping, motor_controller) -> None:
+    def __init__(self, lane_mapping) -> None:
         logging.debug(f"{type(self).__name__}: Initializing with {len(lane_mapping)} lanes")
         self.lanes = lane_mapping
 

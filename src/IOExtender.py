@@ -172,7 +172,7 @@ class MCP23017:
         return current_value & (1 << pin)
 
     def write_pin(self, register, pin, value):
-        logging.debug("MCP23017: ID:0x{:02X} Setting pin {:02} in {:02} to {}".format(self.device_addr, pin, register, value))
+        #logging.debug("MCP23017: ID:0x{:02X} Setting pin {:02} in {:02} to {}".format(self.device_addr, pin, register, value))
         current_value = self.read_regsiter(register)
         if (value == True):
             current_value |= (1 << pin) # Set Pin
@@ -187,5 +187,5 @@ class MCP23017:
         return byte
 
     def write_regsiter(self, register, byte):
-        logging.debug("MCP23017: ID:0x{:02X} Writing register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
+        #logging.debug("MCP23017: ID:0x{:02X} Writing register 0x{:02X} ({:08b})".format(self.device_addr, register, byte))
         self.bus.write_byte_data(self.device_addr, register, byte)

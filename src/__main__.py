@@ -36,9 +36,9 @@ class GameContext:
 
         self._sensor_event_queue = queue.Queue()
         self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
-        self._motor_controller = MotorController(0x04)
-        self._lane_container   = LaneContainer(config.LaneMapping, config.MotorMapping) # TODO: Motor and Lane still need to get coupeled
+        self._lane_container   = LaneContainer(config.LaneMapping)
         self._button_mapping   = config.ButtonMapping
+        self._led_mapping      = config.LedMapping
 
         self.transition_to(state)
 
@@ -46,6 +46,9 @@ class GameContext:
         logging.debug(f"Context: Transition to {type(state).__name__}")
         self._current_state = state
         self._current_state.context = self
+
+        for led in self._led_mapping:
+            led.TurnOff()
 
     def StartProcessing(self):
         logging.debug(f"{type(self).__name__}: Start processing")
@@ -77,6 +80,9 @@ class State(ABC):
 
 class PausingState(State):
     def process(self) -> None:
+        pause_led = self.context._led_mapping[2]
+        pause_led.TurnOn() # TODO: Should be run only in the constructor
+
         sensor_poller = self.context._sensor_container.get_sensor_poller()
         sensor_poller.stop_processing()
 
@@ -91,6 +97,9 @@ class PausingState(State):
 
 class RunningState(State):
     def process(self) -> None:
+        running_led = self.context._led_mapping[1]
+        running_led.TurnOn() # TODO: Should be run only in the constructor
+
         sensor_poller = self.context._sensor_container.get_sensor_poller()
         sensor_poller.start_processing()
 
@@ -109,6 +118,9 @@ class RunningState(State):
 
 class ResettingState(State):
     def process(self) -> None:
+        reset_led = self.context._led_mapping[3]
+        reset_led.TurnOn() # TODO: Should be run only in the constructor
+
         # Setting all motors back to starting processing and resetting scores
 
         # Check Transition Conditions

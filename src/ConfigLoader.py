@@ -8,9 +8,10 @@ from Sensor import MicroSwitch
 from Lane import Lane
 from MotorControl import MotorController, Motor
 from Button import Button
+from Led import Led
 
 
-Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "MotorMapping", "ButtonMapping"])
+Config = namedtuple("Config", ["LaneMapping", "ExtenderMapping", "SensorMapping", "ButtonMapping", "LedMapping"])
 
 class ConfigLoader:
 
@@ -20,6 +21,7 @@ class ConfigLoader:
         self._extender_mapping = list()
         self._sensor_mapping = list()
         self._button_mapping  = list()
+        self._led_mapping  = list()
 
     def LoadConfig(self, config_path):
         try:
@@ -41,12 +43,15 @@ class ConfigLoader:
             button_mapping = dataMap.get("ButtonMapping")
             self.ProcessButtonMapping(button_mapping)
 
+            led_mapping = dataMap.get("LedMapping")
+            self.ProcessLedMapping(led_mapping)
+
         except yaml.YAMLError as exception:
             print(exception)
             exit(-1)
 
     def GetLoadedConfig(self) -> Config:
-        config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, [], self._button_mapping)
+        config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, self._button_mapping, self._led_mapping)
         logging.debug(f"{type(self).__name__}: Returned Config: {config}")
         return config
 
@@ -77,6 +82,13 @@ class ConfigLoader:
             button_data = button.get('Button')
             if (button_data != None):
                 self._button_mapping.append(self.ConstructButton(button_data))
+                continue
+
+    def ProcessLedMapping(self, mapping):
+        for led in mapping:
+            led_data = led.get('Led')
+            if (led_data != None):
+                self._led_mapping.append(self.ConstructLed(led_data))
                 continue
 
 
@@ -123,4 +135,12 @@ class ConfigLoader:
 
         logging.debug(f"{type(self).__name__}: Constructing Button {button_id}, {device_addr}, {pin_number}")
         return Button(button_id, device_addr, pin_number)
+
+    def ConstructLed(self, data) -> int:
+        led_id   = data.get("LedId")
+        device_addr = data.get("DeviceAddress")
+        pin_number  = data.get("PinNumber")
+
+        logging.debug(f"{type(self).__name__}: Constructing LED {led_id}, {device_addr}, {pin_number}")
+        return Led(led_id, device_addr, pin_number)
 

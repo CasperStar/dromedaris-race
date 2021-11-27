@@ -3,20 +3,6 @@
 MotorController:
   Address: 0x04
 
-ButtonMapping:
-  - Button:
-      ButtonId: 0
-      DeviceAddress: 0x21
-      PinNumber: 12
-  - Button:
-      ButtonId: 1
-      DeviceAddress: 0x21
-      PinNumber: 13
-  - Button:
-      ButtonId: 2
-      DeviceAddress: 0x21
-      PinNumber: 14
-
 LaneMapping:
   - Lane:
       LaneId: 0
@@ -191,3 +177,35 @@ SensorMapping:
       DeviceAddress: 0x21
       PinNumber: 10
       DebounceDelay: 500
+
+ButtonMapping:
+  - Button:
+      ButtonId: 0
+      DeviceAddress: 0x21
+      PinNumber: 12
+  - Button:
+      ButtonId: 1
+      DeviceAddress: 0x21
+      PinNumber: 13
+  - Button:
+      ButtonId: 2
+      DeviceAddress: 0x21
+      PinNumber: 14
+
+LedMapping:
+  - Led:
+      LedId: 1
+      DeviceAddress: 0x21
+      PinNumber: 0
+  - Led:
+      LedId: 1
+      DeviceAddress: 0x21
+      PinNumber: 1
+  - Led:
+      LedId: 2
+      DeviceAddress: 0x21
+      PinNumber: 2
+  - Led:
+      LedId: 3
+      DeviceAddress: 0x21
+      PinNumber: 3
