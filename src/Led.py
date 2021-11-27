@@ -1,5 +1,5 @@
 import logging, sys
-
+import time
 from IOExtender import ExtenderPin, IODirection
 
 class Led():
@@ -13,3 +13,8 @@ class Led():
 
     def TurnOff(self):
         self.extender_pin.set(False)
+
+    def TurnOnFor(self, ms:int):
+        self.TurnOn()
+        time.sleep(ms/1000)
+        self.TurnOff()

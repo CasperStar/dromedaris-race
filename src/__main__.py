@@ -108,6 +108,8 @@ class RunningState(State):
 
         # Check Transition Conditions
         if (scored_lane != None):
+            score_led = self.context._led_mapping[0]
+            score_led.TurnOnFor(100)
             if (scored_lane.reached_max_score()):
                 self.context.transition_to(PausingState())
 
