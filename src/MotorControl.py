@@ -88,3 +88,6 @@ class Motor():
     def pause_thread(self):
         logging.debug(f"{type(self).__name__}: Pausing Thread {self.motor_id}")
         self.thread_pausing.set()
+
+    def all_events_processed(self) -> bool:
+        return self.thread_queue.empty()
