@@ -1,19 +1,8 @@
 import logging
-from IOControl import *
+from IOControl import IODirection, DigitalPin
 
-# import RPi.GPIO as GPIO
-# GPIO.setmode(GPIO.BOARD)
-
-#TestClass
-class GPIO:
-    def setup(self, a):
-        pass
-    def output(self, a):
-        pass
-    def input(self, a):
-        pass
-    def PWM(self, a):
-        pass
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
 
 class RaspberryPin(DigitalPin):
     def __init__(self, pin, direction) -> None:

@@ -108,10 +108,10 @@ class MCP23017:
 
     def read_pullup_pin(self, pin):
         if (pin < 8):
-            return self.read_pin(self.GPPUA)
+            return self.read_pin(self.GPPUA, pin)
         else:
             pin = pin % 8
-            return self.read_pin(self.GPPUB)
+            return self.read_pin(self.GPPUB, pin)
 
     def read_pullup_register_a(self):
         return self.read_regsiter(self.GPPUA)
@@ -138,10 +138,10 @@ class MCP23017:
 
     def read_direction_pin(self, pin):
         if (pin < 8):
-            return self.read_pin(self.IODIRA)
+            return self.read_pin(self.IODIRA, pin)
         else:
             pin = pin % 8
-            return self.read_pin(self.IODIRB)
+            return self.read_pin(self.IODIRB, pin)
 
     def read_direction_register_a(self):
         return self.read_regsiter(self.IODIRA)
