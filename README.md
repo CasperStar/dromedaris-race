@@ -1,5 +1,7 @@
 # Dromedaris Race
 
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=CasperStar_dromedaris-race&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=CasperStar_dromedaris-race) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=CasperStar_dromedaris-race&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=CasperStar_dromedaris-race) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=CasperStar_dromedaris-race&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=CasperStar_dromedaris-race) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=CasperStar_dromedaris-race&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=CasperStar_dromedaris-race)
+
 This is a hobby project that recreates the dutch fairgound attraction the 'kamelen race' in a do-it-yourself manner.
 
 The fairground game has a visual representation of multiple figures that need to race to the finish line in a straight line. The figure will move when the player scores a point. The player can score points by rolling the ball in to a certain hole and represents a number of points. The figure will move a few steps depending on the number of points the player score. The player who finish first will win the game.

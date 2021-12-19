@@ -30,9 +30,9 @@ class GameContext:
         logging.debug(f"{type(self).__name__}: Initializing")
 
         # Read + Load Configuration 
-        self.ConfigLoader = ConfigLoader()
-        self.ConfigLoader.load_config("./config.yml")
-        config = self.ConfigLoader.get_loaded_config()
+        self.config_loader = ConfigLoader()
+        self.config_loader.load_config("./config.yml")
+        config = self.config_loader.get_loaded_config()
 
         self._sensor_event_queue = queue.Queue()
         self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
@@ -50,7 +50,7 @@ class GameContext:
         for led in self._led_mapping:
             led.turn_off()
 
-    def StartProcessing(self):
+    def start_processing(self):
         logging.debug(f"{type(self).__name__}: Start processing")
         while(1):
             self._current_state.process()
@@ -143,6 +143,6 @@ class ResettingState(State):
 if __name__ == "__main__":
     try:
         context = GameContext(PausingState())
-        context.StartProcessing()
+        context.start_processing()
     except KeyboardInterrupt:
         logging.info(f"Exiting Program!")
