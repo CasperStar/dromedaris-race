@@ -84,5 +84,4 @@ class Lane:
 
     def pause_motor(self):
         self.motor.pause_thread()
-        pass
 

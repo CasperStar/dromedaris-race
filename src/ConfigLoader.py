@@ -23,72 +23,68 @@ class ConfigLoader:
         self._button_mapping  = list()
         self._led_mapping  = list()
 
-    def LoadConfig(self, config_path):
+    def load_config(self, config_path):
         try:
             with open(config_path) as stream:
-                dataMap = yaml.safe_load(stream)
+                data_map = yaml.safe_load(stream)
 
-            motor_controller_address = dataMap.get("MotorController").get('Address')
+            motor_controller_address = data_map.get("MotorController").get('Address')
             motor_controller = MotorController(motor_controller_address)
 
-            lane_mapping = dataMap.get("LaneMapping")
-            self.ProcessLaneMapping(lane_mapping, motor_controller)
+            lane_mapping = data_map.get("LaneMapping")
+            self.process_lane_mapping(lane_mapping, motor_controller)
 
-            extender_mapping = dataMap.get("ExtenderMapping")
-            self.ProcessExtenderMapping(extender_mapping)
+            extender_mapping = data_map.get("ExtenderMapping")
+            self.process_extender_mapping(extender_mapping)
 
-            sensor_mapping = dataMap.get("SensorMapping")
-            (self.ProcessSensorMapping(sensor_mapping))
+            sensor_mapping = data_map.get("SensorMapping")
+            (self.process_sensor_mapping(sensor_mapping))
 
-            button_mapping = dataMap.get("ButtonMapping")
-            self.ProcessButtonMapping(button_mapping)
+            button_mapping = data_map.get("ButtonMapping")
+            self.process_button_mapping(button_mapping)
 
-            led_mapping = dataMap.get("LedMapping")
-            self.ProcessLedMapping(led_mapping)
+            led_mapping = data_map.get("LedMapping")
+            self.process_led_mapping(led_mapping)
 
         except yaml.YAMLError as exception:
             print(exception)
             exit(-1)
 
-    def GetLoadedConfig(self) -> Config:
+    def get_loaded_config(self) -> Config:
         config = Config(self._lane_mapping, self._extender_mapping, self._sensor_mapping, self._button_mapping, self._led_mapping)
         logging.debug(f"{type(self).__name__}: Returned Config: {config}")
         return config
 
 
-    def ProcessLaneMapping(self, mapping, motor_controller):
+    def process_lane_mapping(self, mapping, motor_controller):
         for lane in mapping:
             lane_data = lane.get('Lane')
             if (lane_data != None):
-                self._lane_mapping.append(self.ConstructLane(lane_data, motor_controller))
-                continue
+                self._lane_mapping.append(self.construct_lane(lane_data, motor_controller))
 
-    def ProcessExtenderMapping(self, mapping):
+    def process_extender_mapping(self, mapping):
         for extender in mapping:
             extender_data = extender.get('MCP23017')
             if (extender_data != None):
-                self._extender_mapping.append(self.ConstructMCP23017(extender_data))
-                continue
+                self._extender_mapping.append(self.construct_mcp23017(extender_data))
 
-    def ProcessSensorMapping(self, mapping):
+    def process_sensor_mapping(self, mapping):
         for sensor in mapping:
             sensor_data = sensor.get('MicroSwitch')
             if (sensor_data != None):
-                self._sensor_mapping.append(self.ConstructMicroSwitch(sensor_data))
-                continue
+                self._sensor_mapping.append(self.construct_microswitch(sensor_data))
 
-    def ProcessButtonMapping(self, mapping):
+    def process_button_mapping(self, mapping):
         for button in mapping:
             button_data = button.get('Button')
             if (button_data != None):
-                self._button_mapping.append(self.ConstructButton(button_data))
-                continue
+                self._button_mapping.append(self.construct_button(button_data))
 
-    def ProcessLedMapping(self, mapping):
+    def process_led_mapping(self, mapping):
         for led in mapping:
             led_data = led.get('Led')
             if (led_data != None):
-                self._led_mapping.append(self.ConstructLed(led_data))
+                self._led_mapping.append(self.construct_led(led_data))
                 continue
 
 
@@ -96,7 +92,7 @@ class ConfigLoader:
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-    def ConstructLane(self, data, motor_controller) -> Lane:
+    def construct_lane(self, data, motor_controller) -> Lane:
         lane_id     = data.get("LaneId")
         score_start = data.get("ScoreStart")
         score_end   = data.get("ScoreEnd")
@@ -108,7 +104,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing Lane {lane_id}, {score_start}, {score_end}, {motor}")
         return Lane(lane_id, score_start, score_end, motor, motor_speed, motor_run_duration)
 
-    def ConstructMCP23017(self, data) -> MCP23017:
+    def construct_mcp23017(self, data) -> MCP23017:
         device_address  = data.get("DeviceAddress")
         reg_a_direction = data.get("RegisterA").get("Direction")
         reg_a_pullup    = data.get("RegisterA").get("Pullup")
@@ -118,7 +114,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing MCP23017 {device_address}, {reg_a_direction}, {reg_a_pullup}, {reg_b_direction}, {reg_b_pullup}")
         return MCP23017(device_address, reg_a_direction, reg_a_pullup, reg_b_direction, reg_b_pullup)
 
-    def ConstructMicroSwitch(self, data) -> MicroSwitch:
+    def construct_microswitch(self, data) -> MicroSwitch:
         track_id    = data.get("TrackId")
         sensor_id   = data.get("SensorId")
         device_addr = data.get("DeviceAddress")
@@ -128,7 +124,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing MicroSwitch {track_id}, {sensor_id}, {device_addr}, {pin_number}, {debounce_time_ms}") 
         return MicroSwitch(track_id, sensor_id, device_addr, pin_number, debounce_time_ms)
 
-    def ConstructButton(self, data) -> Button:
+    def construct_button(self, data) -> Button:
         button_id   = data.get("ButtonId")
         device_addr = data.get("DeviceAddress")
         pin_number  = data.get("PinNumber")
@@ -136,7 +132,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing Button {button_id}, {device_addr}, {pin_number}")
         return Button(button_id, device_addr, pin_number)
 
-    def ConstructLed(self, data) -> Led:
+    def construct_led(self, data) -> Led:
         led_id   = data.get("LedId")
         device_addr = data.get("DeviceAddress")
         pin_number  = data.get("PinNumber")

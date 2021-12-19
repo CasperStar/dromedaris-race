@@ -6,15 +6,15 @@ class Led():
     def __init__(self, led_id, device_addr, pin_number):
         logging.debug(f"{type(self).__name__}: Initializing")
         self.extender_pin = ExtenderPin(device_addr, pin_number, IODirection.OUTPUT)
-        self.TurnOff()
+        self.turn_off()
 
-    def TurnOn(self):
+    def turn_on(self):
         self.extender_pin.set(True)
 
-    def TurnOff(self):
+    def turn_off(self):
         self.extender_pin.set(False)
 
-    def TurnOnFor(self, ms:int):
-        self.TurnOn()
+    def turn_on_for(self, ms:int):
+        self.turn_on()
         time.sleep(ms/1000)
-        self.TurnOff()
+        self.turn_off()

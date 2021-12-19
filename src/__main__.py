@@ -31,8 +31,8 @@ class GameContext:
 
         # Read + Load Configuration 
         self.ConfigLoader = ConfigLoader()
-        self.ConfigLoader.LoadConfig("./config.yml")
-        config = self.ConfigLoader.GetLoadedConfig()
+        self.ConfigLoader.load_config("./config.yml")
+        config = self.ConfigLoader.get_loaded_config()
 
         self._sensor_event_queue = queue.Queue()
         self._sensor_container = SensorContainer(config.ExtenderMapping, config.SensorMapping, self._sensor_event_queue)
@@ -48,7 +48,7 @@ class GameContext:
         self._current_state.context = self
 
         for led in self._led_mapping:
-            led.TurnOff()
+            led.turn_off()
 
     def StartProcessing(self):
         logging.debug(f"{type(self).__name__}: Start processing")
@@ -81,24 +81,24 @@ class State(ABC):
 class PausingState(State):
     def process(self) -> None:
         pause_led = self.context._led_mapping[2]
-        pause_led.TurnOn() # TODO: Should be run only in the constructor
+        pause_led.turn_on() # TODO: Should be run only in the constructor
 
         sensor_poller = self.context._sensor_container.get_sensor_poller()
         sensor_poller.stop_processing()
 
         # Check Transition Conditions
         start_button = self.context._button_mapping[0]
-        if (start_button.IsActive()):
+        if (start_button.is_active()):
             self.context.transition_to(RunningState())
 
         reset_button = self.context._button_mapping[2]
-        if (reset_button.IsActive()):
+        if (reset_button.is_active()):
             self.context.transition_to(ResettingState())
 
 class RunningState(State):
     def process(self) -> None:
         running_led = self.context._led_mapping[1]
-        running_led.TurnOn() # TODO: Should be run only in the constructor
+        running_led.turn_on() # TODO: Should be run only in the constructor
 
         sensor_poller = self.context._sensor_container.get_sensor_poller()
         sensor_poller.start_processing()
@@ -109,19 +109,19 @@ class RunningState(State):
         # Check Transition Conditions
         if (scored_lane != None):
             score_led = self.context._led_mapping[0]
-            score_led.TurnOnFor(100)
+            score_led.turn_on_for(100)
             if (scored_lane.reached_max_score()):
                 self.context.transition_to(PausingState())
 
         pause_button = self.context._button_mapping[1]
-        if (pause_button.IsActive()):
+        if (pause_button.is_active()):
             self.context.transition_to(PausingState())
 
 
 class ResettingState(State):
     def process(self) -> None:
         reset_led = self.context._led_mapping[3]
-        reset_led.TurnOn() # TODO: Should be run only in the constructor
+        reset_led.turn_on() # TODO: Should be run only in the constructor
 
         # Check if all motors events are processed
         lane_container = self.context._lane_container
