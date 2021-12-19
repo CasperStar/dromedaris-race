@@ -96,7 +96,7 @@ class ConfigLoader:
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-    def ConstructLane(self, data, motor_controller) -> int:
+    def ConstructLane(self, data, motor_controller) -> Lane:
         lane_id     = data.get("LaneId")
         score_start = data.get("ScoreStart")
         score_end   = data.get("ScoreEnd")
@@ -108,7 +108,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing Lane {lane_id}, {score_start}, {score_end}, {motor}")
         return Lane(lane_id, score_start, score_end, motor, motor_speed, motor_run_duration)
 
-    def ConstructMCP23017(self, data) -> int:
+    def ConstructMCP23017(self, data) -> MCP23017:
         device_address  = data.get("DeviceAddress")
         reg_a_direction = data.get("RegisterA").get("Direction")
         reg_a_pullup    = data.get("RegisterA").get("Pullup")
@@ -118,7 +118,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing MCP23017 {device_address}, {reg_a_direction}, {reg_a_pullup}, {reg_b_direction}, {reg_b_pullup}")
         return MCP23017(device_address, reg_a_direction, reg_a_pullup, reg_b_direction, reg_b_pullup)
 
-    def ConstructMicroSwitch(self, data):
+    def ConstructMicroSwitch(self, data) -> MicroSwitch:
         track_id    = data.get("TrackId")
         sensor_id   = data.get("SensorId")
         device_addr = data.get("DeviceAddress")
@@ -128,7 +128,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing MicroSwitch {track_id}, {sensor_id}, {device_addr}, {pin_number}, {debounce_time_ms}") 
         return MicroSwitch(track_id, sensor_id, device_addr, pin_number, debounce_time_ms)
 
-    def ConstructButton(self, data) -> int:
+    def ConstructButton(self, data) -> Button:
         button_id   = data.get("ButtonId")
         device_addr = data.get("DeviceAddress")
         pin_number  = data.get("PinNumber")
@@ -136,7 +136,7 @@ class ConfigLoader:
         logging.debug(f"{type(self).__name__}: Constructing Button {button_id}, {device_addr}, {pin_number}")
         return Button(button_id, device_addr, pin_number)
 
-    def ConstructLed(self, data) -> int:
+    def ConstructLed(self, data) -> Led:
         led_id   = data.get("LedId")
         device_addr = data.get("DeviceAddress")
         pin_number  = data.get("PinNumber")

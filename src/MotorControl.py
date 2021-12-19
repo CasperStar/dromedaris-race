@@ -64,7 +64,8 @@ class Motor():
                 is_motor_stopped = True
 
             while (self.thread_pausing.is_set()):
-                pass
+                # Waiting until unpaused
+                pass 
 
         logging.debug(f"{type(self).__name__}: Thread Worker Stopping {self.motor_id}")
 
