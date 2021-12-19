@@ -4,7 +4,7 @@ import logging, sys
 import time 
 from enum import Enum
 
-from IOControl import ExtenderContainer
+from IOExtender import ExtenderContainer
 
 class EdgeEventEnum(Enum):
     EDGE_DETECT_NONE = 0
@@ -89,7 +89,7 @@ class SensorContainer:
     def __update_sensor(self, device_addr, reg_a, reg_b):
         for sensor in self.sensor_container:
             if (sensor.get_device_addr() == device_addr):
-                if (sensor.get_pin_number() <= 8):
+                if (sensor.get_pin_number() < 8):
                     self.__update_event_queue(sensor.update(reg_a))
                 else:
                     self.__update_event_queue(sensor.update(reg_b))
@@ -97,6 +97,7 @@ class SensorContainer:
     def __update_event_queue(self, sensor_event):
         if (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_FALLING):
             self.sensor_event_queue.put(sensor_event)
+            logging.info(f"Adding to event queue: {sensor_event}")
         #elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_RISING):
         #    self.sensor_event_queue.put(sensor_event)
         # elif (sensor_event.get_edge_event() == EdgeEventEnum.EDGE_DETECT_NONE):
@@ -110,21 +111,54 @@ class SensorPoller:
     def __init__(self, callback) -> None:
         logging.debug("SensorPoller: Initializing")
         self.polling_thread_running = threading.Event()
+        self.polling_thread_process = threading.Event()
         self.polling_thread = threading.Thread(target=self.__polling_thread, args=(self.polling_thread_running,))
         self.callback = callback
 
-    def __polling_thread(self, thread_running) -> None:
-        while (self.polling_thread_running.is_set()):
-            logging.debug("SensorPoller: Polling callback")
-            self.callback()
+        self.start_thread()
 
-    def start(self) -> None:
-        logging.debug("SensorPoller: Starting polling thread")
+    def __polling_thread(self, thread_running) -> None:
+        logging.debug(f"{type(self).__name__}: Starting polling thread")
+
+        while (self.polling_thread_running.is_set()):
+            while (self.polling_thread_process.is_set()):
+                #logging.debug(f"{type(self).__name__}: Polling callback") # DEBUG: ENABLE IF NEEDED
+                self.callback()
+
+        logging.debug(f"{type(self).__name__}: Stopping polling thread")
+
+    def start_thread(self) -> None:
         self.polling_thread_running.set()
-        self.polling_thread = threading.Thread(target=self.__polling_thread, args=(self.polling_thread_running,))
         self.polling_thread.start()
 
-    def stop(self) -> None:
-        logging.info("SensorPoller: Stopping polling thread")
+    def stop_thread(self) -> None:
+        self.stop_processing(self)
         self.polling_thread_running.clear()
-        self.polling_thread.join()
+        if (self.polling_thread.is_alive()):
+            self.polling_thread.join()
+
+    def start_processing(self) -> None:
+        #logging.debug(f"{type(self).__name__}: Start processing thread") # DEBUG: ENABLE IF NEEDED
+        self.polling_thread_process.set()
+
+    def stop_processing(self) -> None:
+        #logging.debug(f"{type(self).__name__}: Stop processing thread") # DEBUG: ENABLE IF NEEDED
+        self.polling_thread_process.clear()
+
+
+class SensorEventProcessor:
+    def __init__(self, event_queue, lane_container):
+        self._event_queue = event_queue
+        self._lane_container = lane_container
+
+    def process_sensor_events(self):
+        if (not self._event_queue.empty()):
+            sensor_event = self._event_queue.get_nowait()
+
+            if (EdgeEventEnum.EDGE_DETECT_FALLING == sensor_event.get_edge_event()):
+                lane = self._lane_container.get_track(sensor_event.get_track_id())
+                track_total_score = lane.add_score(1) # TODO: Make score variable and configurable per sensor 
+                logging.info(f"{type(self).__name__}: Lane:{lane.get_track_id()} Sensor:{sensor_event.get_sensor_id()} TotalScore:{track_total_score}")
+                return lane
+
+        return None
