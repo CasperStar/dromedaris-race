@@ -132,7 +132,7 @@ class SensorPoller:
         self.polling_thread.start()
 
     def stop_thread(self) -> None:
-        self.stop_processing(self)
+        self.stop_processing()
         self.polling_thread_running.clear()
         if (self.polling_thread.is_alive()):
             self.polling_thread.join()
